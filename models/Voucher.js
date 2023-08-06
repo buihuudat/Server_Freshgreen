@@ -14,7 +14,6 @@ const VoucherSchema = new mongoose.Schema(
     },
     author: {
       type: String,
-      default: "",
     },
     lastDate: {
       type: Date,

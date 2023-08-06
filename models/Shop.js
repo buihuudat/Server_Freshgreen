@@ -1,52 +1,49 @@
 const mongoose = require("mongoose");
-
 const ShopSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     name: {
       type: String,
       required: true,
     },
-    image: String,
-    description: String,
-    phone: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    address: {
+    description: {
       type: String,
       required: true,
     },
     bio: String,
-    startYear: Number,
+    startYear: {
+      type: Number,
+      required: true,
+    },
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],
-    star: {
-      count: {
-        type: Number,
-      },
-      ratings: [
-        {
-          stars: Number,
-          count: Number,
+    ratings: [
+      {
+        stars: {
+          type: Number,
+          required: true,
         },
-      ],
-    },
+        count: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Follower",
+        ref: "User",
       },
     ],
   },
   { timestamps: true }
 );
-
 module.exports = mongoose.model("Shop", ShopSchema);

@@ -10,6 +10,11 @@ const NewsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+    },
+    tags: [{ name: String }],
     content: {
       type: String,
       required: true,

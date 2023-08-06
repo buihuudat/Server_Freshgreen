@@ -24,6 +24,12 @@ router.post(
       throw new Error("Email đã được sử dụng để đăng ký");
     }
   }),
+  body("username").custom(async (username) => {
+    const user = await User.findOne({ username });
+    if (user) {
+      throw new Error("Tài khoản này đã được sử dụng để đăng ký");
+    }
+  }),
   body("password")
     .isLength({ min: 8 })
     .withMessage("Mật khẩu yêu cầu tối thiểu 8 kí tự"),

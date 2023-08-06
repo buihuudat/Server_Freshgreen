@@ -16,6 +16,11 @@ const UserScheema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     password: String,
     avatar: {
       type: String,
@@ -30,7 +35,7 @@ const UserScheema = new mongoose.Schema(
     },
     role: {
       type: "string",
-      enum: ["user", "customer", "admin"],
+      enum: ["user", "staff", "producer", "admin", "superadmin"],
       default: "user",
     },
     following: [
