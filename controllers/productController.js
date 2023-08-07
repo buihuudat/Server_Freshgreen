@@ -3,8 +3,11 @@ const Product = require("../models/Product");
 const productController = {
   gets: async (req, res) => {
     try {
-      const products = await Product.find();
-      return res.status(200).json(products);
+      const page = parseInt(req.query.page) || 0;
+      const totalProducts = await Product.countDocuments();
+      const perPage = parseInt(req.query.perPage) || totalProducts;
+      const products = await Product.find().skip(page).limit(perPage);
+      return res.status(200).json({ products, page, perPage, totalProducts });
     } catch (error) {
       return res.status(500).json(error);
     }

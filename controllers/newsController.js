@@ -3,8 +3,14 @@ const News = require("../models/News");
 const newsController = {
   gets: async (req, res) => {
     try {
-      const newsList = await News.find();
-      return res.status(200).json(newsList);
+      const page = parseInt(req.query.page) || 0;
+      const totalNews = await News.countDocuments();
+      const perPage = parseInt(req.query.perPage) || totalNews;
+
+      const newsList = await News.find()
+        .skip(page)
+        .limit(perPage || totalProducts);
+      return res.status(200).json({ newsList, page, perPage, totalNews });
     } catch (error) {
       return res.status(500).json(error);
     }
