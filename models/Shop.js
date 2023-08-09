@@ -37,6 +37,18 @@ const ShopSchema = new mongoose.Schema(
         },
       },
     ],
+    averageStarRating: {
+      type: Number,
+      default: function () {
+        if (this.star.count === 0) return 0;
+        return (
+          this.ratings.reduce(
+            (acc, rating) => acc + rating.stars * rating.count,
+            0
+          ) / this.star.count
+        ).toFixed(2);
+      },
+    },
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,

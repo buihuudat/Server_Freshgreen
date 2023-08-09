@@ -3,10 +3,14 @@ const Product = require("../models/Product");
 const productController = {
   gets: async (req, res) => {
     try {
-      const page = parseInt(req.query.page) || 0;
+      const page = parseInt(req.query.page) || 1;
       const totalProducts = await Product.countDocuments();
       const perPage = parseInt(req.query.perPage) || totalProducts;
-      const products = await Product.find().skip(page).limit(perPage);
+
+      const startIndex = (page - 1) * perPage;
+      const endIndex = page * perPage;
+
+      const products = await Product.find().skip(startIndex).limit(endIndex);
       return res.status(200).json({ products, page, perPage, totalProducts });
     } catch (error) {
       return res.status(500).json(error);
@@ -62,6 +66,22 @@ const productController = {
       return res.status(200).json("Product deleted successfully");
     } catch (error) {
       return res.status(200).json(error);
+    }
+  },
+
+  shopProducts: async (req, res) => {
+    try {
+      const page = req.query.page || 1;
+      const perPage = req.query.perPage || 8;
+      const start = (page - 1) * perPage;
+      const end = page * perPage;
+      const totalProducts = await Product.countDocuments();
+      const products = await Product.find({ shop: req.params.id })
+        .skip(start)
+        .limit(end);
+      return res.status(200).json({ products, totalProducts, page, perPage });
+    } catch (error) {
+      return res.status(500).json(error);
     }
   },
 };

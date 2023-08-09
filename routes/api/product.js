@@ -6,6 +6,7 @@ const Product = require("../../models/Product");
 const router = require("express").Router();
 
 router.get("/", productController.gets);
+router.get("/shop/:id/products", productController.shopProducts);
 router.get("/:id", productController.get);
 router.post(
   "/create",
