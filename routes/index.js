@@ -8,7 +8,7 @@ router.get("/", function (req, res, next) {
 
 router.use("/auths", require("./api/auth"));
 router.use("/users", require("./api/user"));
-router.use("/categorys", require("./api/category"));
+router.use("/categories", require("./api/category"));
 router.use("/tags", require("./api/tag"));
 router.use("/voucherss", require("./api/voucher"));
 router.use("/news", require("./api/news"));
