@@ -6,13 +6,16 @@ router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
 
-router.use("/auths", require("./api/auth"));
+router.use("/auth", require("./api/auth"));
 router.use("/users", require("./api/user"));
 router.use("/categories", require("./api/category"));
 router.use("/tags", require("./api/tag"));
-router.use("/voucherss", require("./api/voucher"));
+router.use("/vouchers", require("./api/voucher"));
 router.use("/news", require("./api/news"));
 router.use("/products", require("./api/product"));
 router.use("/shops", require("./api/shop"));
+router.use("/orders", require("./api/order"));
+router.use("/cart", require("./api/cart"));
+router.use("/payment", require("./api/payment"));
 
 module.exports = router;
