@@ -10,7 +10,9 @@ const paymentController = {
         automatic_payment_methods: { enabled: true },
       });
 
-      return res.status(200).json({ client_secret: intent.client_secret });
+      return res
+        .status(200)
+        .json({ client_secret: intent.client_secret, id: intent.id });
     } catch (error) {
       return res.status(500).json(error);
     }
