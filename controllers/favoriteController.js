@@ -4,7 +4,10 @@ const favoriteController = {
   get: async (req, res) => {
     const { userId } = req.params;
     try {
-      const favorites = await Favorite.findOne({ user: userId });
+      const favorites = await Favorite.findOne({ user: userId }).populate(
+        "products.product"
+      );
+
       return res.status(200).json(favorites);
     } catch (error) {
       return res.status(500).json(error);
@@ -36,10 +39,16 @@ const favoriteController = {
             }
           );
         } else {
-          await Favorite.findOneAndDelete({
-            user: userId,
-            "products.product": productId,
-          });
+          await Favorite.updateOne(
+            {
+              user: userId,
+            },
+            {
+              $pull: {
+                products: { product: productId },
+              },
+            }
+          );
         }
       }
       return res.status(200).json(true);
