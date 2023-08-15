@@ -17,5 +17,6 @@ router.use("/shops", require("./api/shop"));
 router.use("/orders", require("./api/order"));
 router.use("/cart", require("./api/cart"));
 router.use("/payment", require("./api/payment"));
+router.use("/favorites", require("./api/favorite"));
 
 module.exports = router;

@@ -5,7 +5,7 @@ const orderController = {
   gets: async (req, res) => {
     const { userId } = req.params;
     try {
-      const orders = await Order.findOne({ user: userId });
+      const orders = await Order.findOne({ "user._id": userId });
       return res.status(200).json(orders);
     } catch (error) {
       return res.status(500).json(error);
@@ -14,18 +14,18 @@ const orderController = {
 
   create: async (req, res) => {
     const { userId } = req.params;
-    const { order } = req.body;
+    const { order, user } = req.body;
     try {
       let newOrder;
-      const checkOrder = await Order.findOne({ user: userId });
+      const checkOrder = await Order.findOne({ "user._id": userId });
       if (!checkOrder) {
         newOrder = await Order.create({
-          user: userId,
+          user,
           orders: [order],
         });
       } else {
         newOrder = await Order.findOneAndUpdate(
-          { user: userId },
+          { "user._id": userId },
           {
             $push: {
               orders: order,
@@ -50,7 +50,7 @@ const orderController = {
     try {
       await Order.findOneAndUpdate(
         {
-          user: userId,
+          "user._id": userId,
           "orders._id": orderId,
         },
         { status }
@@ -64,7 +64,7 @@ const orderController = {
   delete: async (req, res) => {
     const { userId } = req.params;
     try {
-      await Order.findOneAndDelete({ user: userId });
+      await Order.findOneAndDelete({ "user._id": userId });
       return res.status(200).json({ message: "Deleted order successfully" });
     } catch (error) {
       return res.status(500).json(error);

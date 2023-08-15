@@ -89,8 +89,22 @@ const OrderItem = new mongoose.Schema(
 
 const OrderSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    _id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    username: String,
+    fullname: {
+      firstname: String,
+      lastname: String,
+    },
+    avatar: String,
+    phone: String,
+    email: String,
+    address: {
+      city: String,
+      district: String,
+      ward: String,
+      street: String,
+      more: String,
+    },
   },
   orders: [OrderItem],
 });
