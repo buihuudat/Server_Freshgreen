@@ -3,7 +3,7 @@ const request = require("request-promise");
 
 const url = "https://nest.botble.com/vi/faq";
 
-module.exports = {
+const faqController = {
   get: async (req, res) => {
     try {
       let data = [];
@@ -43,3 +43,5 @@ module.exports = {
     }
   },
 };
+
+module.exports = faqController;
