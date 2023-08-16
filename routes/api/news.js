@@ -13,6 +13,7 @@ router.post(
   validation,
   newsController.create
 );
+router.put("/:id/views", newsController.updateView);
 router.put(
   "/:id",
   body("title").isLength({ min: 10, max: 100 }).withMessage("Invalid title"),

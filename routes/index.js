@@ -19,4 +19,6 @@ router.use("/cart", require("./api/cart"));
 router.use("/payment", require("./api/payment"));
 router.use("/favorites", require("./api/favorite"));
 
+router.use("/faq", require("./api/faq"));
+
 module.exports = router;

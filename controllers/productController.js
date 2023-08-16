@@ -4,14 +4,35 @@ const productController = {
   gets: async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
-      const totalProducts = await Product.countDocuments();
-      const perPage = parseInt(req.query.perPage) || totalProducts;
-
+      const perPage = parseInt(req.query.perPage) || 8;
       const startIndex = (page - 1) * perPage;
-      const endIndex = page * perPage;
 
-      const products = await Product.find().skip(startIndex).limit(endIndex);
-      return res.status(200).json({ products, page, perPage, totalProducts });
+      const category = req.query.category
+        ? req.query.category.split(",")
+        : undefined;
+
+      const shop = req.query.shop ? req.query.shop.split(",") : undefined;
+
+      const minPrice = req.query.minPrice
+        ? parseInt(req.query.minPrice)
+        : undefined;
+      const maxPrice = req.query.maxPrice
+        ? parseInt(req.query.maxPrice)
+        : undefined;
+
+      const filter = {};
+      if (category) filter.category = { $in: category };
+      if (shop) filter.shop = { $in: shop };
+      if (minPrice) filter.lastPrice = { $gte: minPrice };
+      if (maxPrice) filter.lastPrice = { ...filter.price, $lte: maxPrice };
+
+      const products = await Product.find(filter)
+        .skip(startIndex)
+        .limit(perPage);
+
+      return res
+        .status(200)
+        .json({ products, page, perPage, totalProducts: products.length });
     } catch (error) {
       return res.status(500).json(error);
     }

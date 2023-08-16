@@ -51,6 +51,19 @@ const newsController = {
       return res.status(500).json(error);
     }
   },
+
+  updateView: async (req, res) => {
+    try {
+      const news = await News.findById(req.params.id);
+      if (!news) {
+        return res.status(400).json({ error: "News not found" });
+      }
+      await news.updateOne({ viewCount: news.viewCount + 1 });
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
 };
 
 module.exports = newsController;
