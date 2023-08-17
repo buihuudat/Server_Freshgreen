@@ -1,5 +1,6 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const User = require("../models/User");
 
 const orderController = {
   gets: async (req, res) => {
@@ -66,6 +67,19 @@ const orderController = {
     try {
       await Order.findOneAndDelete({ "user._id": userId });
       return res.status(200).json({ message: "Deleted order successfully" });
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  getOrders: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const admin = await User.findById(id);
+      if (!admin || admin.role !== ("admin" || "superAdmin"))
+        return res.status(401).json({ message: "You are not admin" });
+      const orders = await Order.find();
+      return res.status(200).json(orders);
     } catch (error) {
       return res.status(500).json(error);
     }
