@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "bhd-ecommerce",
   "builds": [
     {
       "src": "app.js",
