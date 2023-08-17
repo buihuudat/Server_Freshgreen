@@ -26,13 +26,13 @@ const productController = {
       if (minPrice) filter.lastPrice = { $gte: minPrice };
       if (maxPrice) filter.lastPrice = { ...filter.price, $lte: maxPrice };
 
+      const totalProducts = await Product.countDocuments();
+
       const products = await Product.find(filter)
         .skip(startIndex)
         .limit(perPage);
 
-      return res
-        .status(200)
-        .json({ products, page, perPage, totalProducts: products.length });
+      return res.status(200).json({ products, page, perPage, totalProducts });
     } catch (error) {
       return res.status(500).json(error);
     }

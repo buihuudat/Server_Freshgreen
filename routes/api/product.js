@@ -11,8 +11,8 @@ router.get("/:id", productController.get);
 router.post(
   "/create",
   body("title")
-    .isLength({ min: 10, max: 100 })
-    .withMessage("Product title must be between 10 and 100 characters long."),
+    .isLength({ min: 3, max: 100 })
+    .withMessage("Product title must be between 3 and 100 characters long."),
   body("title").custom(async (title) => {
     const product = await Product.findOne({ title });
     if (product) {
