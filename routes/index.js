@@ -18,6 +18,7 @@ router.use("/orders", require("./api/order"));
 router.use("/cart", require("./api/cart"));
 router.use("/payment", require("./api/payment"));
 router.use("/favorites", require("./api/favorite"));
+router.use("/comments", require("./api/comment"));
 
 router.use("/faq", require("./api/faq"));
 

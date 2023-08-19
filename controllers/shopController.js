@@ -1,3 +1,4 @@
+const Product = require("../models/Product");
 const Shop = require("../models/Shop");
 const User = require("../models/User");
 
@@ -40,7 +41,11 @@ const shopController = {
       if (!shop) {
         return res.status(400).json("Shop not found");
       }
-      await User.findByIdAndUpdate(req.body.user, { role: "user" });
+      await User.findByIdAndUpdate(req.body.user, {
+        role: "user",
+        products: [],
+      });
+      await Product.deleteMany({ shop: shop._id });
       return res.status(200).json("Shop delete successful");
     } catch (error) {
       return res.status(500).json(error);
