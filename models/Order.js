@@ -57,8 +57,8 @@ const OrderItem = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["spending", "success", "cancel", "refuse"],
-      default: "spending",
+      enum: ["pending", "success", "access", "done", "refuse"],
+      default: "pending",
       index: true,
     },
     message: {
@@ -79,7 +79,7 @@ const OrderItem = new mongoose.Schema(
       },
       status: {
         type: String,
-        enum: ["spending", "falure", "success"],
+        enum: ["pending", "falure", "success"],
         default: "pending",
       },
     },
@@ -88,24 +88,7 @@ const OrderItem = new mongoose.Schema(
 );
 
 const OrderSchema = new mongoose.Schema({
-  user: {
-    _id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    username: String,
-    fullname: {
-      firstname: String,
-      lastname: String,
-    },
-    avatar: String,
-    phone: String,
-    email: String,
-    address: {
-      city: String,
-      district: String,
-      ward: String,
-      street: String,
-      more: String,
-    },
-  },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   orders: [OrderItem],
 });
 

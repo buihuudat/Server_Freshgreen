@@ -6,7 +6,10 @@ const orderController = {
   gets: async (req, res) => {
     const { userId } = req.params;
     try {
-      const orders = await Order.findOne({ "user._id": userId });
+      const orders = await Order.findOne({ user: userId }).populate(
+        "user",
+        "-password"
+      );
       return res.status(200).json(orders);
     } catch (error) {
       return res.status(500).json(error);
@@ -15,18 +18,18 @@ const orderController = {
 
   create: async (req, res) => {
     const { userId } = req.params;
-    const { order, user } = req.body;
+    const { order } = req.body;
     try {
       let newOrder;
-      const checkOrder = await Order.findOne({ "user._id": userId });
+      const checkOrder = await Order.findOne({ user: userId });
       if (!checkOrder) {
         newOrder = await Order.create({
-          user,
+          user: userId,
           orders: [order],
         });
       } else {
         newOrder = await Order.findOneAndUpdate(
-          { "user._id": userId },
+          { user: userId },
           {
             $push: {
               orders: order,
@@ -47,16 +50,30 @@ const orderController = {
 
   updateStatusOfOrder: async (req, res) => {
     const { userId, orderId } = req.params;
-    const { status } = req.body;
+    const { status, message } = req.body;
+
     try {
+      const updateData = { $set: { "orders.$.status": status } };
+
+      if (message !== undefined) {
+        updateData.$set["orders.$.message"] = message;
+      }
+
       await Order.findOneAndUpdate(
         {
-          "user._id": userId,
+          user: userId,
           "orders._id": orderId,
         },
-        { status }
+        updateData
       );
-      return res.status(200).json({ message: "Updated order successfully" });
+
+      const response = { orderId, status };
+
+      if (message !== undefined) {
+        response.message = message;
+      }
+
+      return res.status(200).json(response);
     } catch (error) {
       return res.status(500).json(error);
     }
@@ -78,7 +95,7 @@ const orderController = {
       const admin = await User.findById(id);
       if (!admin || admin.role !== ("admin" || "superAdmin"))
         return res.status(401).json({ message: "You are not admin" });
-      const orders = await Order.find();
+      const orders = await Order.find().populate("user", "-password");
       return res.status(200).json(orders);
     } catch (error) {
       return res.status(500).json(error);
