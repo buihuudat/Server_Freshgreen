@@ -53,7 +53,11 @@ const shopController = {
   },
   get: async (req, res) => {
     try {
-      const shop = await Shop.findById(req.params.id);
+      const shop = await Shop.findById(req.params.id).populate({
+        path: "user",
+        model: "User",
+        select: "address phone email avatar",
+      });
       if (!shop) {
         return res.status(400).json("Shop not found");
       }
@@ -64,7 +68,11 @@ const shopController = {
   },
   gets: async (req, res) => {
     try {
-      const shops = await Shop.find();
+      const shops = await Shop.find().populate({
+        path: "user",
+        model: "User",
+        select: "address phone email avatar",
+      });
       return res.status(200).json(shops);
     } catch (error) {
       return res.status(500).json(error);

@@ -1,10 +1,11 @@
 const Product = require("../models/Product");
+const User = require("../models/User");
 
 const productController = {
   gets: async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
-      const perPage = parseInt(req.query.perPage) || 8;
+      const perPage = parseInt(req.query.perPage);
       const startIndex = (page - 1) * perPage;
 
       const category = req.query.category
@@ -30,7 +31,17 @@ const productController = {
 
       const products = await Product.find(filter)
         .skip(startIndex)
-        .limit(perPage);
+        .limit(perPage || totalProducts)
+        .populate({
+          path: "shop",
+          model: "Shop",
+          select: "name user",
+          populate: {
+            path: "user",
+            model: "User",
+            select: "avatar",
+          },
+        });
 
       return res.status(200).json({ products, page, perPage, totalProducts });
     } catch (error) {

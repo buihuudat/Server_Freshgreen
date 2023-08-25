@@ -10,7 +10,14 @@ const newsController = {
       const startIndex = (page - 1) * perPage;
       const endIndex = page * perPage;
 
-      const newsList = await News.find().skip(startIndex).limit(endIndex);
+      const newsList = await News.find()
+        .skip(startIndex)
+        .limit(endIndex)
+        .populate({
+          path: "author",
+          model: "User",
+          select: "username",
+        });
       return res.status(200).json({ newsList, page, perPage, totalNews });
     } catch (error) {
       return res.status(500).json(error);

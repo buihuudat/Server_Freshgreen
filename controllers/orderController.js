@@ -1,5 +1,6 @@
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const Product = require("../models/Product");
 const User = require("../models/User");
 
 const orderController = {
@@ -38,9 +39,16 @@ const orderController = {
           { new: true }
         );
       }
-      await Cart.findOneAndDelete({ user: userId });
 
       const newOrderInfo = newOrder.orders[newOrder.orders.length - 1];
+      await Promise.all([
+        await Cart.findOneAndDelete({ user: userId }),
+        ...newOrderInfo.products.map(async (product) => {
+          await Product.findByIdAndUpdate(product._id, {
+            $inc: { currentQuantity: -1, sold: +1 },
+          });
+        }),
+      ]);
 
       return res.status(201).json(newOrderInfo);
     } catch (error) {
@@ -59,7 +67,7 @@ const orderController = {
         updateData.$set["orders.$.message"] = message;
       }
 
-      await Order.findOneAndUpdate(
+      const order = await Order.findOneAndUpdate(
         {
           user: userId,
           "orders._id": orderId,
