@@ -8,6 +8,7 @@ const router = require("express").Router();
 router.get("/", productController.gets);
 router.get("/shop/:id/products", productController.shopProducts);
 router.get("/:id", productController.get);
+
 router.post(
   "/create",
   body("title")
@@ -25,6 +26,7 @@ router.post(
   validation,
   productController.create
 );
+
 router.put(
   "/:id",
   body("title")
@@ -36,6 +38,7 @@ router.put(
   validation,
   productController.update
 );
+
 router.patch("/:id", productController.delete);
 
 module.exports = router;

@@ -67,7 +67,7 @@ const orderController = {
         updateData.$set["orders.$.message"] = message;
       }
 
-      const order = await Order.findOneAndUpdate(
+      await Order.findOneAndUpdate(
         {
           user: userId,
           "orders._id": orderId,

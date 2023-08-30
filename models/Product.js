@@ -23,30 +23,9 @@ const ProductSchema = new mongoose.Schema(
       },
     },
 
-    star: {
-      count: {
-        type: Number,
-        default: 0,
-      },
-      ratings: [
-        {
-          stars: Number,
-          count: Number,
-        },
-      ],
-    },
-
     averageStarRating: {
       type: Number,
-      default: function () {
-        if (this.star.count === 0) return 0;
-        return (
-          this.ratings.reduce(
-            (acc, rating) => acc + rating.stars * rating.count,
-            0
-          ) / this.star.count
-        ).toFixed(2);
-      },
+      default: 0,
     },
 
     category: {

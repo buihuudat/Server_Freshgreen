@@ -61,10 +61,12 @@ const OrderItem = new mongoose.Schema(
       default: "pending",
       index: true,
     },
+
     message: {
       type: String,
       default: "",
     },
+
     pay: {
       method: {
         type: String,

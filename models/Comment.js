@@ -6,6 +6,7 @@ const CommentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    rate: Number,
     content: {
       type: String,
       required: true,
@@ -18,11 +19,8 @@ const CommentSchema = new mongoose.Schema(
     ],
     reaction: [
       {
-        name: String,
-        author: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
       },
     ],
     edited: {

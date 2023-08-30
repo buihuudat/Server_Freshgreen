@@ -50,10 +50,30 @@ const productController = {
   },
   get: async (req, res) => {
     try {
-      const product = await Product.findById(req.params.id);
+      const product = await Product.findById(req.params.id).populate([
+        {
+          path: "shop",
+          model: "Shop",
+          select: "name user",
+          populate: {
+            path: "user",
+            model: "User",
+            select: "avatar",
+          },
+        },
+        {
+          path: "comments",
+        },
+      ]);
       if (!product) {
         return res.status(400).json("Product not found");
       }
+
+      const comments = product.comments;
+      const averageStarRating = comments.reduce((acc, v) => {
+        return (acc + v.rate) / comments.length;
+      }, 0);
+      await product.updateOne({ averageStarRating });
       return res.status(200).json(product);
     } catch (error) {
       return res.status(200).json(error);
