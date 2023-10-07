@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const NewsSchema = new mongoose.Schema(
   {
+    thumbnail: String,
     title: {
       type: String,
       required: true,
@@ -23,6 +24,12 @@ const NewsSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    likeCount: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

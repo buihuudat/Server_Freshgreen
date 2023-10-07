@@ -16,7 +16,7 @@ const newsController = {
         .populate({
           path: "author",
           model: "User",
-          select: "username",
+          select: "_id username fullname avatar",
         });
       return res.status(200).json({ newsList, page, perPage, totalNews });
     } catch (error) {
@@ -66,6 +66,27 @@ const newsController = {
         return res.status(400).json({ error: "News not found" });
       }
       await news.updateOne({ viewCount: news.viewCount + 1 });
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+  updateLike: async (req, res) => {
+    try {
+      const news = await News.findById(req.params.id);
+      if (!news) {
+        return res.status(400).json({ error: "News not found" });
+      }
+  
+      const userIndex = news.likeCount.indexOf(req.params.userId);
+      if (userIndex !== -1) {
+        news.likeCount.splice(userIndex, 1);
+      } else {
+        news.likeCount.push(req.params.userId);
+      }
+  
+      await news.save();
+  
       return res.status(200).json(true);
     } catch (error) {
       return res.status(500).json(error);

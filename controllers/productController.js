@@ -1,5 +1,4 @@
 const Product = require("../models/Product");
-const User = require("../models/User");
 
 const productController = {
   gets: async (req, res) => {
@@ -124,13 +123,12 @@ const productController = {
   shopProducts: async (req, res) => {
     try {
       const page = req.query.page || 1;
-      const perPage = req.query.perPage || 8;
+      const perPage = req.query.perPage;
       const start = (page - 1) * perPage;
-      const end = page * perPage;
-      const totalProducts = await Product.countDocuments();
+      const totalProducts = await Product.countDocuments({ shop: req.params.id });
       const products = await Product.find({ shop: req.params.id })
         .skip(start)
-        .limit(end);
+        .limit(perPage || totalProducts);
       return res.status(200).json({ products, totalProducts, page, perPage });
     } catch (error) {
       return res.status(500).json(error);

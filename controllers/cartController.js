@@ -56,7 +56,7 @@ const cartController = {
     try {
       const cart = await Cart.findOneAndUpdate(
         {
-          _id: req.params.cartId,
+          user: req.params.userId,
           "products._id": req.params.productId,
         },
         {
@@ -64,7 +64,9 @@ const cartController = {
         }
       );
 
-      if (!cart) return res.status(400).json({ error: "Cart not found" });
+      console.log(req.params.userId);
+
+      if (!cart) return res.status(404).json({ error: "Cart not found" });
       return res.status(200).json(true);
     } catch (error) {
       return res.status(500).json(error);
@@ -72,10 +74,10 @@ const cartController = {
   },
 
   downCountProduct: async (req, res) => {
-    const { cartId, productId } = req.params;
+    const { userId, productId } = req.params;
     try {
       const updateQuery = {
-        _id: cartId,
+        user: userId,
         "products._id": productId,
       };
       const cart = await Cart.findOneAndUpdate(updateQuery, {
@@ -105,13 +107,16 @@ const cartController = {
 
   removeProduct: async (req, res) => {
     try {
-      const cart = await Cart.findByIdAndUpdate(req.params.cartId, {
-        $pull: {
-          products: {
-            _id: req.params.productId,
+      const cart = await Cart.findOneAndUpdate(
+        { user: req.params.userId },
+        {
+          $pull: {
+            products: {
+              _id: req.params.productId,
+            },
           },
-        },
-      });
+        }
+      );
       if (!cart) return res.status(400).json({ error: "Cart not found" });
       return res.status(200).json(true);
     } catch (error) {
