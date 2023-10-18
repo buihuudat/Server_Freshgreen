@@ -7,6 +7,8 @@ const router = require("express").Router();
 
 router.get("/", productController.gets);
 router.get("/shop/:id/products", productController.shopProducts);
+router.get("/popular", productController.popularProducts);
+router.get("/best-seller", productController.bestSellerProducts);
 router.get("/:id", productController.get);
 
 router.post(
@@ -27,6 +29,7 @@ router.post(
   productController.create
 );
 
+router.put("/views/:productId", productController.updateView);
 router.put(
   "/:id",
   body("title")

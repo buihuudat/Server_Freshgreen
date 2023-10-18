@@ -1,4 +1,5 @@
 const Favorite = require("../models/Favorite");
+const Product = require("../models/Product");
 
 const favoriteController = {
   get: async (req, res) => {
@@ -30,25 +31,39 @@ const favoriteController = {
         const checkFavoriteProduct = await Favorite.findOne(query);
 
         if (!checkFavoriteProduct) {
-          await Favorite.findOneAndUpdate(
-            { user: userId },
-            {
+          await Promise.all([
+            Favorite.findOneAndUpdate(
+              { user: userId },
+              {
+                $push: {
+                  products: { product: productId },
+                },
+              }
+            ),
+            Product.findByIdAndUpdate(productId, {
               $push: {
-                products: { product: productId },
+                favorites: userId,
               },
-            }
-          );
+            }),
+          ]);
         } else {
-          await Favorite.updateOne(
-            {
-              user: userId,
-            },
-            {
-              $pull: {
-                products: { product: productId },
+          await Promise.all([
+            Favorite.updateOne(
+              {
+                user: userId,
               },
-            }
-          );
+              {
+                $pull: {
+                  products: { product: productId },
+                },
+              }
+            ),
+            Product.findByIdAndUpdate(productId, {
+              $pull: {
+                favorites: userId,
+              },
+            }),
+          ]);
         }
       }
       return res.status(200).json(true);

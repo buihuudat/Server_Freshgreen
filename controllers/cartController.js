@@ -64,12 +64,10 @@ const cartController = {
         }
       );
 
-      console.log(req.params.userId);
-
       if (!cart) return res.status(404).json({ error: "Cart not found" });
       return res.status(200).json(true);
     } catch (error) {
-      return res.status(500).json(error);
+      return res.status(500).json(false);
     }
   },
 

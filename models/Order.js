@@ -4,10 +4,6 @@ const OrderItem = new mongoose.Schema(
   {
     products: [
       {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-        },
         images: [String],
         title: {
           type: String,
@@ -22,9 +18,17 @@ const OrderItem = new mongoose.Schema(
           type: Number,
           default: 0,
         },
-        lastPrice: Number,
+        lastPrice: {
+          type: Number,
+          default: function () {
+            return this.price - (this.price * this.discount) / 100;
+          },
+        },
 
-        averageStarRating: Number,
+        averageStarRating: {
+          type: Number,
+          default: 0,
+        },
 
         category: {
           type: String,
@@ -40,13 +44,38 @@ const OrderItem = new mongoose.Schema(
         },
 
         quantity: Number,
+        sold: {
+          type: Number,
+          default: 0,
+        },
+        currentQuantity: {
+          type: Number,
+          default: function () {
+            return this.quantity - this.sold;
+          },
+        },
 
         brand: String,
         shop: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Shop",
         },
-
+        comments: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Comment",
+          },
+        ],
+        favorites: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+        ],
+        views: {
+          type: Number,
+          default: 0,
+        },
         count: { type: Number, default: 0 },
       },
     ],

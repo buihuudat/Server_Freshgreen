@@ -4,10 +4,21 @@ require("dotenv").config();
  * Module dependencies.
  */
 
+const hostAdmin =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:9999"
+    : "https://admin-ecommerce-bhd.vercel.app/";
+const hostClient =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "http://freshgreen.io.vn";
+
 const app = require("../app");
 const debug = require("debug")("server:server");
 const http = require("http");
 const mongoose = require("mongoose");
+const socketIo = require("socket.io");
+const socketHandler = require("../handlers/socketConnect");
 
 /**
  * Get port from environment and store in Express.
@@ -21,6 +32,12 @@ app.set("port", port);
  */
 
 const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: [hostClient, hostAdmin],
+    credentials: true,
+  },
+});
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -35,6 +52,15 @@ mongoose
     server.listen(port);
     server.on("error", onError);
     server.on("listening", onListening);
+    io.on("connection", (socket) => {
+      socketHandler(socket);
+
+      socket.on("disconnect", (reason) => {
+        if (reason === "io server disconnect") {
+          socket.connect();
+        }
+      });
+    });
   })
   .catch((err) => {
     console.log(err);

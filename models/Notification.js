@@ -6,6 +6,7 @@ const notificationSchema = new mongoose.Schema(
     title: String,
     description: String,
     path: String,
+    status: Boolean,
   },
   { timestamps: true }
 );

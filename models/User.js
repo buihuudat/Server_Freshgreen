@@ -13,7 +13,7 @@ const UserScheema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: true,
+      // required: true,
       unique: true,
     },
     username: {
@@ -38,12 +38,15 @@ const UserScheema = new mongoose.Schema(
       enum: ["user", "staff", "producer", "admin", "superadmin"],
       default: "user",
     },
-    following: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Shop",
-      },
-    ],
+    googleId: String,
+    verifyEmail: {
+      type: Boolean,
+      default: false,
+    },
+    verifyPhone: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

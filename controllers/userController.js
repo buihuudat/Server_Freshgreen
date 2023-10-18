@@ -1,3 +1,8 @@
+const {
+  host,
+  generateVerificationToken,
+  transporter,
+} = require("../handlers/emailHandler");
 const User = require("../models/User");
 const CriptoJS = require("crypto-js");
 
@@ -119,14 +124,44 @@ const userController = {
 
   delete: async (req, res) => {
     try {
-      const user = await User.findOneAndDelete(req.params.id, {
-        avatar: req.body.image,
-      });
+      const user = await User.findByIdAndDelete(req.params.id);
+      console.log(req.params.id);
       if (!user) return res.status(400).json("Không tìm thấy người dùng");
       return res.status(200).json({ message: "Đã xóa thành công người dùng" });
     } catch (err) {
       return res.status(500).json(err);
     }
+  },
+
+  verifyEmail: async (req, res) => {
+    const email = req.body.email;
+    try {
+      const verification = generateVerificationToken();
+
+      const mailOptions = {
+        from: "info@freshgreen.io.vn",
+        to: email,
+        subject: "Email Verification",
+        html: `<p>Click <a href="${host}/verify/${verification}">here</a> to verify your email.</p>`,
+      };
+      await transporter.sendMail(mailOptions);
+
+      await User.findOneAndUpdate(
+        { email },
+        {
+          verifyEmail: true,
+        }
+      );
+
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  verifyPhone: async (req, res) => {
+    try {
+    } catch (error) {}
   },
 };
 

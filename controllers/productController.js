@@ -1,4 +1,6 @@
+const Order = require("../models/Order");
 const Product = require("../models/Product");
+const _ = require("lodash");
 
 const productController = {
   gets: async (req, res) => {
@@ -125,7 +127,9 @@ const productController = {
       const page = req.query.page || 1;
       const perPage = req.query.perPage;
       const start = (page - 1) * perPage;
-      const totalProducts = await Product.countDocuments({ shop: req.params.id });
+      const totalProducts = await Product.countDocuments({
+        shop: req.params.id,
+      });
       const products = await Product.find({ shop: req.params.id })
         .skip(start)
         .limit(perPage || totalProducts);
@@ -133,6 +137,112 @@ const productController = {
     } catch (error) {
       return res.status(500).json(error);
     }
+  },
+
+  updateView: async (req, res) => {
+    const { productId } = req.params;
+    try {
+      const product = await Product.findByIdAndUpdate(
+        productId,
+        {
+          $inc: { views: 1 },
+        },
+        { new: true }
+      );
+      if (!product)
+        return res.status(404).json({ message: "Product not found" });
+
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+  popularProducts: async (req, res) => {
+    try {
+      const products = await Product.find()
+        .sort({
+          views: -1,
+          "favorites.length": -1,
+          sold: -1,
+          "comments.length": -1,
+        })
+        .limit(8);
+
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  bestSellerProducts: async (req, res) => {
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    const lastDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
+
+    try {
+      const bestSellers = await Order.aggregate([
+        {
+          $match: {
+            "orders.status": "done",
+            "orders.createdAt": {
+              $gte: firstDayOfMonth,
+              $lte: lastDayOfMonth,
+            },
+          },
+        },
+        {
+          $unwind: "$orders",
+        },
+        {
+          $match: {
+            "orders.status": "done",
+            "orders.createdAt": {
+              $gte: firstDayOfMonth,
+              $lte: lastDayOfMonth,
+            },
+          },
+        },
+        {
+          $unwind: "$orders.products",
+        },
+        {
+          $group: {
+            _id: "$orders.products._id",
+            product: { $first: "$orders.products" },
+            totalSales: { $sum: 1 },
+          },
+        },
+        {
+          $sort: {
+            totalSales: -1,
+          },
+        },
+        {
+          $limit: 8,
+        },
+      ]);
+
+      const bestSellingProducts = bestSellers.map((item) => ({
+        ...item.product,
+        totalSales: item.totalSales,
+      }));
+      return res.status(200).json(bestSellingProducts);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  dealOfDayProducts: async (req, res) => {
+    try {
+    } catch (error) {}
   },
 };
 

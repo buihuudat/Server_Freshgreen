@@ -11,10 +11,10 @@ const createToken = (id) => {
 
 module.exports = {
   login: async (req, res) => {
-    const { phone, username, password } = req.body;
+    const { phone, password } = req.body;
     try {
       const isUser = await User.findOne({
-        $or: [{ phone }, { username }],
+        $or: [{ phone }, { username: phone }, { email: phone }],
       });
 
       if (!isUser)
@@ -67,5 +67,51 @@ module.exports = {
     } catch (error) {
       return res.status(500).json(error);
     }
+  },
+  google: async (req, res) => {
+    const { user } = req.body;
+    try {
+      const existingUser = await User.findOne({ googleId: user.googleId });
+
+      if (existingUser) {
+        const token = createToken(existingUser._id);
+        return res.status(200).json({ user: existingUser, token });
+      }
+
+      const userWithSameEmail = await User.findOne({ email: user.email });
+      if (userWithSameEmail) {
+        return res.status(400).json({
+          message:
+            "Email này đã được liên kết với một tài khoản khác. Vui lòng đăng nhập bằng mật khẩu.",
+        });
+      }
+
+      const userWithSameUsername = await User.findOne({
+        username: user.username,
+      });
+      if (userWithSameUsername) {
+        return res.status(400).json({
+          message:
+            "Tên đăng nhập này đã được sử dụng. Vui lòng đăng nhập bằng mật khẩu.",
+        });
+      }
+
+      user.password = CryptoJS.AES.encrypt(
+        user.password,
+        process.env.PASSWORD_SECRET_KEY
+      ).toString();
+
+      const newUser = await User.create(user);
+      const token = createToken(newUser._id);
+      return res.status(200).json({ user: newUser, token });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json(error);
+    }
+  },
+
+  resetPassword: async (req, res) => {
+    try {
+    } catch (error) {}
   },
 };

@@ -7,6 +7,7 @@ const User = require("../../models/User");
 const router = require("express").Router();
 
 router.post("/login", authController.login);
+router.post("/login/google", authController.google);
 router.post(
   "/register",
   body("phone")
@@ -36,6 +37,8 @@ router.post(
   validation,
   authController.register
 );
+
+router.post("/reset-password", authController.resetPassword);
 
 router.post("/verify-token", verifyToken, (req, res) => {
   res.status(200).json({ user: req.user });

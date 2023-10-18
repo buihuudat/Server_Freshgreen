@@ -19,8 +19,9 @@ router.use("/cart", require("./api/cart"));
 router.use("/payment", require("./api/payment"));
 router.use("/favorites", require("./api/favorite"));
 router.use("/comments", require("./api/comment"));
-router.use("/notification", require("./api/notification"));
+router.use("/notifications", require("./api/notification"));
 router.use("/settings", require("./api/settings"));
+router.use("/messages", require("./api/message"));
 
 router.use("/faq", require("./api/faq"));
 

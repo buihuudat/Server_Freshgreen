@@ -27,4 +27,7 @@ router.put(
 
 router.patch("/:id", userController.delete);
 
+router.post("/verify-email", userController.verifyEmail);
+router.post("/verify-phone-number", userController.verifyPhone);
+
 module.exports = router;
