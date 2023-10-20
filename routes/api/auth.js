@@ -8,6 +8,8 @@ const router = require("express").Router();
 
 router.post("/login", authController.login);
 router.post("/login/google", authController.google);
+router.post("/login/facebook", authController.facebook);
+router.post("/login/sms", authController.sms);
 router.post(
   "/register",
   body("phone")

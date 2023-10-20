@@ -138,7 +138,6 @@ const productController = {
       return res.status(500).json(error);
     }
   },
-
   updateView: async (req, res) => {
     const { productId } = req.params;
     try {
@@ -157,9 +156,22 @@ const productController = {
       return res.status(500).json(error);
     }
   },
+  productsView: async (req, res) => {
+    try {
+      const products = await Product.find().limit(8);
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
   popularProducts: async (req, res) => {
     try {
-      const products = await Product.find()
+      const products = await Product.find({
+        views: { $exists: true },
+        "favorites.length": { $exists: true },
+        sold: { $exists: true },
+        "comments.length": { $exists: true },
+      })
         .sort({
           views: -1,
           "favorites.length": -1,
@@ -167,6 +179,11 @@ const productController = {
           "comments.length": -1,
         })
         .limit(8);
+
+      if (!products.length) {
+        const currentProducts = await Product.find().limit(8);
+        return res.status(200).json(currentProducts);
+      }
 
       return res.status(200).json(products);
     } catch (error) {

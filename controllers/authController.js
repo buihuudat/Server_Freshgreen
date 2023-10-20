@@ -69,7 +69,7 @@ module.exports = {
     }
   },
   google: async (req, res) => {
-    const { user } = req.body;
+    const user = req.body;
     try {
       const existingUser = await User.findOne({ googleId: user.googleId });
 
@@ -81,8 +81,9 @@ module.exports = {
       const userWithSameEmail = await User.findOne({ email: user.email });
       if (userWithSameEmail) {
         return res.status(400).json({
+          type: "email_existed",
           message:
-            "Email này đã được liên kết với một tài khoản khác. Vui lòng đăng nhập bằng mật khẩu.",
+            "Tài khoản Google đã được liên kết với một tài khoản khác. Vui lòng đăng nhập bằng mật khẩu.",
         });
       }
 
@@ -91,6 +92,7 @@ module.exports = {
       });
       if (userWithSameUsername) {
         return res.status(400).json({
+          type: "username_existed",
           message:
             "Tên đăng nhập này đã được sử dụng. Vui lòng đăng nhập bằng mật khẩu.",
         });
@@ -106,6 +108,64 @@ module.exports = {
       return res.status(200).json({ user: newUser, token });
     } catch (error) {
       console.error(error);
+      return res.status(500).json(error);
+    }
+  },
+
+  facebook: async (req, res) => {
+    const user = req.body;
+    try {
+      const existingUser = await User.findOne({ facebookId: user.facebookId });
+
+      if (existingUser) {
+        const token = createToken(existingUser._id);
+        return res.status(200).json({ user: existingUser, token });
+      }
+
+      const userWithSameEmail = await User.findOne({ email: user.email });
+      if (userWithSameEmail) {
+        return res.status(400).json({
+          type: "email_existed",
+          message:
+            "Tài khoản Facebook đã được liên kết với một tài khoản khác. Vui lòng đăng nhập bằng mật khẩu.",
+        });
+      }
+
+      const userWithSameUsername = await User.findOne({
+        username: user.username,
+      });
+      if (userWithSameUsername) {
+        return res.status(400).json({
+          type: "username_existed",
+          message:
+            "Tên đăng nhập này đã được sử dụng. Vui lòng đăng nhập bằng mật khẩu.",
+        });
+      }
+
+      user.password = CryptoJS.AES.encrypt(
+        user.password,
+        process.env.PASSWORD_SECRET_KEY
+      ).toString();
+
+      const newUser = await User.create(user);
+      const token = createToken(newUser._id);
+      return res.status(200).json({ user: newUser, token });
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  sms: async (req, res) => {
+    const phone = req.body.phone;
+    try {
+      const user = await User.findOne({ phone });
+      if (!user)
+        return res
+          .status(404)
+          .json({ message: "Số điện thoại chưa được dùng để đăng kí" });
+      const token = createToken(user._id);
+      return res.status(200).json({ token, user });
+    } catch (error) {
       return res.status(500).json(error);
     }
   },
