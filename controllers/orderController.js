@@ -2,6 +2,9 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const User = require("../models/User");
+const { notificationHandler } = require("../handlers/notificationHandler");
+const tokensNotification = require("../models/tokensNotification");
+const admin = require("firebase-admin");
 
 const orderController = {
   gets: async (req, res) => {
@@ -50,8 +53,26 @@ const orderController = {
         }),
       ]);
 
+      const { tokens } = await tokensNotification.findOne();
+
+      const tokensResult = tokens
+        .filter((data) => data.user.role === "admin")
+        .flatMap((data) => data.tokens);
+
+      await admin.messaging().sendEachForMulticast({
+        notification: {
+          title: "FreshGreen",
+          body: "Có một đơn hàng mới",
+        },
+        tokens: tokensResult,
+        data: {
+          userId,
+        },
+      });
+
       return res.status(201).json(newOrderInfo);
     } catch (error) {
+      console.log(error);
       return res.status(500).json(error);
     }
   },
@@ -81,8 +102,33 @@ const orderController = {
         response.message = message;
       }
 
+      const { tokens } = await tokensNotification.findOne();
+
+      const userFiltered = tokens.find(
+        (token) => token.user.userId.toString() === userId
+      );
+
+      if (status === "access") {
+        await admin.messaging().sendEachForMulticast({
+          notification: {
+            title: "FreshGreen",
+            body: "Đơn hàng của bạn đã được xác nhận.",
+          },
+          tokens: userFiltered.tokens,
+        });
+      } else if (status === "refuse") {
+        await admin.messaging().sendEachForMulticast({
+          notification: {
+            title: "FreshGreen",
+            body: "Đơn hàng của bạn đã bị từ chối.",
+          },
+          tokens: userFiltered.tokens,
+        });
+      }
+
       return res.status(200).json(response);
     } catch (error) {
+      console.log(error);
       return res.status(500).json(error);
     }
   },

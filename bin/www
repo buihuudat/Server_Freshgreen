@@ -4,6 +4,7 @@ require("dotenv").config();
  * Module dependencies.
  */
 
+const hostApp = "http://192.168.1.132:19000";
 const hostAdmin =
   process.env.NODE_ENV === "development"
     ? "http://localhost:9999"
@@ -18,7 +19,7 @@ const debug = require("debug")("server:server");
 const http = require("http");
 const mongoose = require("mongoose");
 const socketIo = require("socket.io");
-const socketHandler = require("../handlers/socketConnect");
+const { socketHandler } = require("../handlers/socketConnect");
 
 /**
  * Get port from environment and store in Express.
@@ -34,7 +35,7 @@ app.set("port", port);
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: [hostClient, hostAdmin],
+    origin: [hostClient, hostAdmin, hostApp],
     credentials: true,
   },
 });

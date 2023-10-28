@@ -6,12 +6,10 @@ const MessageSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    recipient: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    content: {
-      type: String,
+    users: Array,
+    message: {
+      text: String,
+      image: String,
     },
     reply: {
       type: Boolean,
@@ -21,4 +19,6 @@ const MessageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.Schema("Message", MessageSchema);
+MessageSchema.index({ user: 1 });
+
+module.exports = mongoose.model("Message", MessageSchema);

@@ -11,24 +11,19 @@ const createToken = (id) => {
 
 module.exports = {
   login: async (req, res) => {
-    const { phone, password } = req.body;
+    const { username, password } = req.body;
     try {
       const isUser = await User.findOne({
-        $or: [{ phone }, { username: phone }, { email: phone }],
+        $or: [{ phone: username }, { username }, { email: username }],
       });
 
       if (!isUser)
         return res.status(400).json({
           errors: [
-            phone
-              ? {
-                  path: "phone",
-                  msg: "Số điện thoại không đúng",
-                }
-              : {
-                  path: "username",
-                  msg: "Tài khoản không đúng",
-                },
+            {
+              path: "username",
+              msg: "Tên đăng nhập hoặc mật khẩu không đúng",
+            },
           ],
         });
 
@@ -42,7 +37,7 @@ module.exports = {
           errors: [
             {
               path: "password",
-              msg: "Mật khẩu không hợp lệ",
+              msg: "Tên đăng nhập hoặc mật khẩu không đúng",
             },
           ],
         });

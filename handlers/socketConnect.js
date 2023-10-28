@@ -1,11 +1,12 @@
 const onlineUsers = new Map();
 const adminSockets = [];
+
 const socketHandler = (socket) => {
-  socket.on("admin-login", () => {
+  socket.on("admin-connect", () => {
     adminSockets.push(socket.id);
   });
 
-  socket.on("user", (userId) => {
+  socket.on("user-connect", (userId) => {
     onlineUsers.set(userId, socket.id);
     console.log(`User ${userId} connected`);
   });
@@ -26,6 +27,11 @@ const socketHandler = (socket) => {
     });
   });
 
+  socket.on("send-message", (data) => {
+    const sendUserSocket = onlineUsers.get(data.to);
+    if (sendUserSocket) socket.emit("message-recieve", data);
+  });
+
   socket.on("disconnect", () => {
     const index = adminSockets.indexOf(socket.id);
     if (index !== -1) {
@@ -34,4 +40,4 @@ const socketHandler = (socket) => {
   });
 };
 
-module.exports = socketHandler;
+module.exports = { socketHandler };

@@ -1,32 +1,51 @@
 const TokensNotification = require("../models/tokensNotification");
+const User = require("../models/User");
 
 const tokenNotificationController = {
   pushToken: async (req, res) => {
     try {
-      const { token, id } = req.body;
+      const { token, id, platform } = req.body;
+
       const tokensNotification = await TokensNotification.findOne();
 
-      const existingTokenIndex = tokensNotification.tokens.findIndex(
-        (item) => item.token === token
+      if (!tokensNotification) {
+        await TokensNotification.create({
+          tokens: [],
+          devices: [],
+        });
+      }
+
+      const tokens = tokensNotification?.tokens;
+      const tokensDevice = tokensNotification?.devices;
+      if (platform === "mobile") {
+        if (!tokensDevice.mobile.includes(token))
+          tokensDevice.mobile.push(token);
+      } else {
+        if (!tokensDevice.web.includes(token)) tokensDevice.web.push(token);
+      }
+
+      const userExisted = tokens.findIndex(
+        (data) => data.user.userId.toString() === id
       );
-      const isTokenExist = existingTokenIndex !== -1;
-      const isDifferentUser =
-        isTokenExist &&
-        tokensNotification.tokens[existingTokenIndex].user !== id;
-
-      if (isTokenExist && isDifferentUser) {
-        tokensNotification.tokens[existingTokenIndex].user = id;
-        await tokensNotification.save();
-        return res.status(200).json(true);
+      if (userExisted !== -1) {
+        if (!tokens[userExisted].tokens.includes(token)) {
+          tokens[userExisted].tokens.push(token);
+        }
+      } else {
+        console.log(3);
+        const user = await User.findById(id);
+        tokens.push({
+          tokens: [token],
+          user: {
+            userId: user._id,
+            role: user.role,
+          },
+        });
       }
 
-      if (!isTokenExist) {
-        tokensNotification.tokens.push({ token, user: id });
-        await tokensNotification.save();
-        return res.status(200).json(true);
-      }
+      await tokensNotification.save();
 
-      return res.status(200).json(false);
+      return res.status(200).json(true);
     } catch (error) {
       console.error("Error adding token to notifications:", error);
       return res.status(500).json(error);

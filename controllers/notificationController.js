@@ -1,3 +1,4 @@
+const { notificationHandler } = require("../handlers/notificationHandler");
 const Notification = require("../models/Notification");
 
 const notificationController = {
@@ -51,6 +52,21 @@ const notificationController = {
       return res.status(200).json(true);
     } catch (error) {
       return res.status(500).json(false);
+    }
+  },
+
+  pushNotification: async (req, res) => {
+    const { title, body } = req.body;
+    try {
+      await notificationHandler(title, body, token);
+      return res
+        .status(200)
+        .json({ success: true, message: "Message sent successfully" });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error sending message" });
     }
   },
 };
