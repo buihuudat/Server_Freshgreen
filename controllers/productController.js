@@ -261,6 +261,22 @@ const productController = {
     try {
     } catch (error) {}
   },
+
+  search: async (req, res) => {
+    const { product } = req.query;
+    try {
+      const products = await Product.find();
+      const productResult =
+        product === "" || product === undefined
+          ? []
+          : products.filter((data) =>
+              data.title.toLowerCase().includes(product.toLowerCase())
+            );
+      return res.status(200).json(productResult);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
 };
 
 module.exports = productController;

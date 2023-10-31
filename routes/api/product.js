@@ -10,6 +10,7 @@ router.get("/shop/:id/products", productController.shopProducts);
 router.get("/popular", productController.popularProducts);
 router.get("/products-view", productController.productsView);
 router.get("/best-seller", productController.bestSellerProducts);
+router.get("/search", productController.search);
 router.get("/:id", productController.get);
 
 router.post(
