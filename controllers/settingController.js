@@ -22,7 +22,12 @@ const settingController = {
     const images = req.body.images;
     const { id, adminID } = req.params;
     const checkAdmin = await User.findById(adminID);
-    console.log(adminID, checkAdmin);
+    // const banners = await Settings.create({
+    //   banners: {
+    //     images,
+    //   },
+    // });
+    // return res.status(200).json(banners);
     if (
       !checkAdmin ||
       (checkAdmin.role !== "admin" && checkAdmin.role !== "superadmin")

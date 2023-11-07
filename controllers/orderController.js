@@ -2,9 +2,9 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const User = require("../models/User");
-const { notificationHandler } = require("../handlers/notificationHandler");
 const tokensNotification = require("../models/tokensNotification");
 const admin = require("firebase-admin");
+const Notification = require("../models/Notification");
 
 const orderController = {
   gets: async (req, res) => {
@@ -47,9 +47,18 @@ const orderController = {
       await Promise.all([
         await Cart.findOneAndDelete({ user: userId }),
         ...newOrderInfo.products.map(async (product) => {
-          await Product.findByIdAndUpdate(product._id, {
-            $inc: { currentQuantity: -1, sold: +1 },
-          });
+          const productUpdated = await Product.findByIdAndUpdate(
+            product._id,
+            {
+              $inc: { currentQuantity: -1, sold: +1 },
+            },
+            { new: true }
+          );
+
+          if (productUpdated.quantity <= 0) {
+            productUpdated.status = false;
+            await productUpdated.save();
+          }
         }),
       ]);
 
@@ -108,22 +117,40 @@ const orderController = {
         (token) => token.user.userId.toString() === userId
       );
 
-      if (status === "access") {
-        await admin.messaging().sendEachForMulticast({
-          notification: {
-            title: "FreshGreen",
-            body: "Đơn hàng của bạn đã được xác nhận.",
-          },
-          tokens: userFiltered.tokens,
-        });
-      } else if (status === "refuse") {
-        await admin.messaging().sendEachForMulticast({
-          notification: {
-            title: "FreshGreen",
-            body: "Đơn hàng của bạn đã bị từ chối.",
-          },
-          tokens: userFiltered.tokens,
-        });
+      if (userFiltered.tokens.length) {
+        if (status === "access") {
+          await admin.messaging().sendEachForMulticast({
+            notification: {
+              title: "FreshGreen",
+              body: "Đơn hàng của bạn đã được xác nhận.",
+            },
+            tokens: userFiltered?.tokens,
+          });
+          await Notification.create({
+            auth: req.body.adminId,
+            title: "Đơn hàng",
+            description: "Đơn hàng của bạn đã được xác nhận.",
+            path: "OrderManager",
+            status: true,
+            send: [req.body.adminId, userId],
+          });
+        } else if (status === "refuse") {
+          await admin.messaging().sendEachForMulticast({
+            notification: {
+              title: "FreshGreen",
+              body: "Đơn hàng của bạn đã bị từ chối.",
+            },
+            tokens: userFiltered.tokens,
+          });
+          await Notification.create({
+            auth: req.body.adminId,
+            title: "Đơn hàng",
+            description: "Đơn hàng của bạn đã bị từ chối.",
+            path: "OrderManager",
+            status: true,
+            send: [req.body.adminId, userId],
+          });
+        }
       }
 
       return res.status(200).json(response);

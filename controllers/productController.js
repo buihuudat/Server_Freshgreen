@@ -13,6 +13,7 @@ const productController = {
         ? req.query.category.split(",")
         : undefined;
 
+      const limit = req.query.limit ? req.query.limit.split(",")[0] : undefined;
       const shop = req.query.shop ? req.query.shop.split(",") : undefined;
 
       const minPrice = req.query.minPrice
@@ -28,21 +29,40 @@ const productController = {
       if (minPrice) filter.lastPrice = { $gte: minPrice };
       if (maxPrice) filter.lastPrice = { ...filter.price, $lte: maxPrice };
 
-      const totalProducts = await Product.countDocuments();
-
-      const products = await Product.find(filter)
-        .skip(startIndex)
-        .limit(perPage || totalProducts)
-        .populate({
-          path: "shop",
-          model: "Shop",
-          select: "name user",
-          populate: {
-            path: "user",
-            model: "User",
-            select: "avatar",
-          },
-        });
+      let totalProducts;
+      totalProducts = await Product.countDocuments({ status: true });
+      let products;
+      if (limit === "admin") {
+        totalProducts = await Product.countDocuments();
+        products = await Product.find({ ...filter })
+          .skip(startIndex)
+          .limit(perPage || totalProducts)
+          .populate({
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          });
+      } else {
+        totalProducts = await Product.countDocuments({ status: true });
+        products = await Product.find({ ...filter, status: true })
+          .skip(startIndex)
+          .limit(perPage || totalProducts)
+          .populate({
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          });
+      }
 
       return res.status(200).json({ products, page, perPage, totalProducts });
     } catch (error) {
@@ -82,7 +102,17 @@ const productController = {
   },
   create: async (req, res) => {
     try {
-      const product = await Product.create(req.body);
+      const newProduct = await Product.create(req.body);
+      const product = await Product.findById(newProduct._id).populate({
+        path: "shop",
+        model: "Shop",
+        select: "name user",
+        populate: {
+          path: "user",
+          model: "User",
+          select: "avatar",
+        },
+      });
       return res.status(201).json(product);
     } catch (error) {
       return res.status(500).json(error);
@@ -90,8 +120,12 @@ const productController = {
   },
   update: async (req, res) => {
     try {
-      const isExisted = await Product.findOne({ title: req.body.title });
-      if (isExisted._id === req.params.id) {
+      const isExisted = await Product.findById(req.body._id);
+      if (!isExisted)
+        return res.status(404).json({ message: "Product not found" });
+
+      const isExistedTitle = await Product.findOne({ title: req.body.title });
+      if (isExistedTitle._id === req.params.id) {
         return res.status(400).json({
           erros: [
             {
@@ -101,7 +135,9 @@ const productController = {
           ],
         });
       }
-      const product = await Product.findByIdAndUpdate(req.params.id, req.body);
+      const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+      });
       if (!product) {
         return res.status(400).json("Product not found");
       }
@@ -130,7 +166,7 @@ const productController = {
       const totalProducts = await Product.countDocuments({
         shop: req.params.id,
       });
-      const products = await Product.find({ shop: req.params.id })
+      const products = await Product.find({ shop: req.params.id, status: true })
         .skip(start)
         .limit(perPage || totalProducts);
       return res.status(200).json({ products, totalProducts, page, perPage });
@@ -158,7 +194,7 @@ const productController = {
   },
   productsView: async (req, res) => {
     try {
-      const products = await Product.find().limit(8);
+      const products = await Product.find({ status: true }).limit(8);
       return res.status(200).json(products);
     } catch (error) {
       return res.status(500).json(error);
@@ -171,6 +207,7 @@ const productController = {
         "favorites.length": { $exists: true },
         sold: { $exists: true },
         "comments.length": { $exists: true },
+        status: true,
       })
         .sort({
           views: -1,
@@ -231,9 +268,25 @@ const productController = {
           $unwind: "$orders.products",
         },
         {
+          $lookup: {
+            from: "products", // Tên của collection chứa thông tin sản phẩm
+            localField: "orders.products._id",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        {
+          $unwind: "$product",
+        },
+        {
+          $match: {
+            "product.status": true, // Chỉ lấy sản phẩm có status true
+          },
+        },
+        {
           $group: {
             _id: "$orders.products._id",
-            product: { $first: "$orders.products" },
+            product: { $first: "$product" },
             totalSales: { $sum: 1 },
           },
         },
@@ -262,10 +315,43 @@ const productController = {
     } catch (error) {}
   },
 
+  ratedHighted: async (req, res) => {
+    try {
+      const products = await Product.find({ status: true })
+        .sort({ averageStarRating: -1 })
+        .limit(8);
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  newProducts: async (req, res) => {
+    try {
+      const products = await Product.find({ status: true })
+        .sort({ createdAt: -1 })
+        .limit(8);
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  biggestDiscount: async (req, res) => {
+    try {
+      const products = await Product.find({ status: true })
+        .sort({ discount: -1 })
+        .limit(8);
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
   search: async (req, res) => {
     const { product } = req.query;
     try {
-      const products = await Product.find();
+      const products = await Product.find({ status: true });
       const productResult =
         product === "" || product === undefined
           ? []

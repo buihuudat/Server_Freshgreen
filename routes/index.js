@@ -10,6 +10,7 @@ router.use("/auth", require("./api/auth"));
 router.use("/users", require("./api/user"));
 router.use("/categories", require("./api/category"));
 router.use("/tags", require("./api/tag"));
+router.use("/unit", require("./api/unit"));
 router.use("/vouchers", require("./api/voucher"));
 router.use("/news", require("./api/news"));
 router.use("/products", require("./api/product"));

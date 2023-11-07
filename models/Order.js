@@ -72,6 +72,8 @@ const OrderItem = new mongoose.Schema(
             ref: "User",
           },
         ],
+        unit: String,
+
         views: {
           type: Number,
           default: 0,

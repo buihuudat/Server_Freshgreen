@@ -31,6 +31,9 @@ const ProductSchema = new mongoose.Schema(
     category: {
       type: String,
     },
+    unit: {
+      type: String,
+    },
     tags: [
       {
         name: String,
@@ -38,7 +41,7 @@ const ProductSchema = new mongoose.Schema(
     ],
     status: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
     quantity: Number,

@@ -6,41 +6,57 @@ const tokenNotificationController = {
     try {
       const { token, id, platform } = req.body;
 
-      const tokensNotification = await TokensNotification.findOne();
+      let tokensNotification = await TokensNotification.findOne();
 
       if (!tokensNotification) {
-        await TokensNotification.create({
+        tokensNotification = await TokensNotification.create({
           tokens: [],
-          devices: [],
+          devices: { mobile: [], web: [] },
         });
       }
 
-      const tokens = tokensNotification?.tokens;
-      const tokensDevice = tokensNotification?.devices;
-      if (platform === "mobile") {
-        if (!tokensDevice.mobile.includes(token))
-          tokensDevice.mobile.push(token);
-      } else {
-        if (!tokensDevice.web.includes(token)) tokensDevice.web.push(token);
+      const { tokens, devices } = tokensNotification;
+
+      if (platform === "mobile" && !devices.mobile.includes(token)) {
+        devices.mobile.push(token);
+      } else if (platform === "web" && !devices.web.includes(token)) {
+        devices.web.push(token);
       }
 
-      const userExisted = tokens.findIndex(
-        (data) => data.user.userId.toString() === id
-      );
-      if (userExisted !== -1) {
-        if (!tokens[userExisted].tokens.includes(token)) {
-          tokens[userExisted].tokens.push(token);
+      let userFound = false;
+      let tokenReplaced = false;
+
+      tokens.forEach((userTokens) => {
+        if (userTokens.user.userId.toString() === id) {
+          userFound = true;
+          const userTokenIndex = userTokens.tokens.findIndex(
+            (t) => t === token
+          );
+          if (userTokenIndex !== -1) {
+            userTokens.tokens[userTokenIndex] = token; // Thay thế token
+            tokenReplaced = true;
+          }
         }
-      } else {
-        console.log(3);
+      });
+
+      if (!userFound) {
         const user = await User.findById(id);
-        tokens.push({
-          tokens: [token],
-          user: {
-            userId: user._id,
-            role: user.role,
-          },
-        });
+        if (user) {
+          const userTokenIndex = tokens.findIndex(
+            (userTokens) => userTokens.user.userId.toString() === id
+          );
+          if (userTokenIndex !== -1) {
+            tokens.splice(userTokenIndex, 1); // Xoá user cũ có token đó đi
+          }
+          tokens.push({
+            tokens: [token],
+            user: {
+              userId: user._id,
+              role: user.role,
+              platform: platform,
+            },
+          });
+        }
       }
 
       await tokensNotification.save();

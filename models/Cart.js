@@ -43,6 +43,9 @@ const CartSchema = new mongoose.Schema({
       },
 
       quantity: Number,
+      unit: String,
+      views: Number,
+      sold: Number,
 
       brand: String,
       shop: {

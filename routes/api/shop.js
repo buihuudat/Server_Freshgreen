@@ -17,6 +17,7 @@ router.post(
   validation,
   shopController.create
 );
+router.put("/:id/follow", shopController.follow);
 router.put("/:id", shopController.update);
 router.patch("/:id", shopController.delete);
 

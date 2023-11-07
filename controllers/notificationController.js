@@ -15,6 +15,34 @@ const notificationController = {
     }
   },
 
+  get: async (req, res) => {
+    try {
+      const notifications = await Notification.find({
+        send: {
+          $elemMatch: {
+            $eq: req.params.userId,
+          },
+        },
+      }).sort({ createdAt: -1 });
+      return res.status(200).json(notifications);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  seen: async (req, res) => {
+    try {
+      const notification = await Notification.findByIdAndUpdate(req.params.id, {
+        seen: true,
+      });
+      if (!notification)
+        return res.status(404).json({ message: "Notification not found" });
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
   create: async (req, res) => {
     try {
       const newNotification = await Notification.create(req.body);

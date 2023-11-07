@@ -45,7 +45,8 @@ const shopController = {
         role: "user",
         products: [],
       });
-      await Product.deleteMany({ shop: shop._id });
+
+      await Product.updateMany({ shop: shop._id }, { status: false });
       return res.status(200).json("Shop delete successful");
     } catch (error) {
       return res.status(500).json(error);
@@ -75,6 +76,27 @@ const shopController = {
       });
       return res.status(200).json(shops);
     } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+  follow: async (req, res) => {
+    const { id } = req.params;
+    const userId = req.body.userId;
+    try {
+      const shop = await Shop.findById(id);
+      if (!shop) return res.status(404).json({ message: "Shop not found" });
+      const shopIndex = shop.followers.findIndex(
+        (fl) => fl?.toString() === userId
+      );
+      if (shopIndex === -1) {
+        shop.followers.push(userId);
+      } else {
+        shop.followers.splice(shopIndex, 1);
+      }
+      await shop.save();
+      return res.status(200).json(true);
+    } catch (error) {
+      console.log(error);
       return res.status(500).json(error);
     }
   },

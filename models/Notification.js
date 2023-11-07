@@ -7,6 +7,11 @@ const notificationSchema = new mongoose.Schema(
     description: String,
     path: String,
     status: Boolean,
+    send: Array,
+    seen: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
