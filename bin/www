@@ -8,7 +8,7 @@ const hostApp = "http://192.168.1.8:19000";
 const hostAdmin =
   process.env.NODE_ENV === "development"
     ? "http://localhost:9999"
-    : "https://admin-ecommerce-bhd.vercel.app/";
+    : "https://admin-freshgreen.vercel.app";
 const hostClient =
   process.env.NODE_ENV === "development"
     ? "http://localhost:3000"
