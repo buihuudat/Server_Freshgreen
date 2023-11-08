@@ -18,6 +18,11 @@ const settingSchema = new mongoose.Schema(
       youtube: String,
       instagram: String,
     },
+
+    emailSendPort: {
+      email: String,
+      password: String,
+    },
   },
   { timestamps: true }
 );
