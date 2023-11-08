@@ -5,14 +5,8 @@ require("dotenv").config();
  */
 
 const hostApp = "http://192.168.1.8:19000";
-const hostAdmin =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:9999"
-    : "https://admin-freshgreen.vercel.app";
-const hostClient =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : "http://freshgreen.io.vn";
+const hostAdmin = "https://admin-freshgreen.vercel.app";
+const hostClient = "http://freshgreen.io.vn";
 
 const app = require("../app");
 const debug = require("debug")("server:server");
