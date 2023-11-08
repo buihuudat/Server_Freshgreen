@@ -1,42 +1,49 @@
 const onlineUsers = new Map();
-const adminSockets = [];
+const adminSockets = new Map();
 
 const socketHandler = (socket) => {
-  socket.on("admin-connect", () => {
-    adminSockets.push(socket.id);
+  socket.on("admin-connect", (data) => {
+    if (data.username === "dat54261001") {
+      adminSockets.set(data.id, socket.id);
+      console.log("admin online");
+    }
   });
 
   socket.on("user-connect", (userId) => {
     onlineUsers.set(userId, socket.id);
-    console.log(`User ${userId} connected`);
-  });
-
-  socket.on("create-order", () => {
-    adminSockets.forEach((adminSocketId) => {
-      socket.to(adminSocketId).emit("new-order");
-    });
-  });
-  socket.on("access-order", () => {
-    adminSockets.forEach((adminSocketId) => {
-      socket.to(adminSocketId).emit("access-order");
-    });
-  });
-  socket.on("refuse-order", () => {
-    adminSockets.forEach((adminSocketId) => {
-      socket.to(adminSocketId).emit("refuse-order");
-    });
+    console.log(`user ${userId} is online`);
   });
 
   socket.on("send-message", (data) => {
     const sendUserSocket = onlineUsers.get(data.to);
-    if (sendUserSocket) socket.emit("message-recieve", data);
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit("message-recieve", data);
+      console.log("a", sendUserSocket);
+    }
+  });
+
+  socket.on("send-message-to-admin", (data) => {
+    const sendAdminSocket = adminSockets.get(data.to);
+    if (sendAdminSocket) {
+      socket.to(sendAdminSocket).emit("message-recieve", data);
+      console.log("c", sendAdminSocket);
+    }
   });
 
   socket.on("disconnect", () => {
-    const index = adminSockets.indexOf(socket.id);
-    if (index !== -1) {
-      adminSockets.splice(index, 1);
-    }
+    adminSockets.forEach((socketId, userId) => {
+      if (socketId === socket.id) {
+        adminSockets.delete(userId);
+        console.log(`Admin ${userId} disconnected`);
+      }
+    });
+
+    onlineUsers.forEach((socketId, userId) => {
+      if (socketId === socket.id) {
+        onlineUsers.delete(userId);
+        console.log(`User ${userId} disconnected`);
+      }
+    });
   });
 };
 

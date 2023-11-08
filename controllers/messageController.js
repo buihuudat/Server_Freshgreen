@@ -9,26 +9,31 @@ const openai = new OpenAI({ apiKey });
 
 const messageController = {
   ask: async (req, res) => {
-    const { message } = req.body;
     try {
-      const products = await Product.find();
-      const productName = products.flatMap((product) => product.title);
+      const products = await Product.find({ status: true }).select("title");
+      const productNames = products.map((product) => product.title);
+
+      const messages = [
+        {
+          role: "user",
+          content: `Chỉ đưa ra tên sản phẩm ở trong ${productNames.join(", ")}`,
+        },
+        { role: "assistant", content: req.body.message },
+      ];
+
       const response = await openai.chat.completions.create({
-        messages: [
-          {
-            role: "user",
-            content: `rules: 
-            chỉ trả lời các câu hỏi liên quan tới đồ ăn,
-            chỉ đưa ra tên đồ ăn ở trong ${productName},
-            ask: ${message}`,
-          },
-        ],
+        messages,
         model: "gpt-3.5-turbo",
       });
+
       const aiResponse = response.choices;
       return res.status(200).json({ message: aiResponse[0].message.content });
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      // Log the error for debugging purposes
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "An error occurred while processing your request." });
     }
   },
 
@@ -37,14 +42,14 @@ const messageController = {
     try {
       const [checkSenderExisted, checkReveicerExisted] = await Promise.all([
         User.findById(from),
-        Shop.findById(to),
+        User.findById(to),
       ]);
       if (!checkSenderExisted)
         return res.status(404).json({ message: "Sender not existed" });
       if (!checkReveicerExisted)
         return res.status(404).json({ message: "Reveicer not existed" });
 
-      const addMessage = await Message.create({
+      await Message.create({
         users: [from, to],
         message: {
           text: message.text,
@@ -53,7 +58,55 @@ const messageController = {
         sender: from,
       });
 
-      return res.status(201).json(addMessage);
+      return res.status(201).json({
+        fromSelf: true,
+        message: message?.text || message?.image,
+      });
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  gets: async (req, res) => {
+    try {
+      const messages = await Message.aggregate([
+        {
+          $sort: { createdAt: -1 },
+        },
+        {
+          $group: {
+            _id: "$sender",
+            lastMessage: { $first: "$message" },
+            users: { $first: "$users" },
+            createdAt: { $first: "$createdAt" },
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
+        {
+          $project: {
+            _id: 1,
+            userId: "$user._id",
+            username: "$user.username",
+            email: "$user.email",
+            avatar: "$user.avatar",
+            fullname: "$user.fullname",
+            lastMessage: 1,
+            users: 1,
+            createdAt: 1,
+          },
+        },
+      ]);
+      return res.status(200).json(messages);
     } catch (error) {
       return res.status(500).json(error);
     }
@@ -72,7 +125,7 @@ const messageController = {
 
       const messData = messages.map((mess) => {
         return {
-          fromSelf: mess.sender.toString() === from,
+          fromSelf: mess.sender.toString() !== from,
           message: mess.message?.text || mess.message?.image,
         };
       });
