@@ -117,7 +117,7 @@ const orderController = {
         (token) => token.user.userId.toString() === userId
       );
 
-      if (userFiltered.tokens.length) {
+      if (userFiltered?.tokens && userFiltered?.tokens.length) {
         if (status === "access") {
           await admin.messaging().sendEachForMulticast({
             notification: {
