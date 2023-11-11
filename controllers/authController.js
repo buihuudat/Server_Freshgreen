@@ -225,4 +225,18 @@ module.exports = {
       return res.status(200).send("Email sent successfully");
     } catch (error) {}
   },
+
+  checkPhone: async (req, res) => {
+    const { phone } = req.body;
+    try {
+      const user = await User.findOne({ phone });
+      if (!user)
+        return res
+          .status(404)
+          .json({ message: "Số điện thoại chưa được sử dụng để đăng kí" });
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
 };

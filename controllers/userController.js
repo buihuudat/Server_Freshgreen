@@ -1,17 +1,26 @@
-const {
-  host,
-  generateVerificationToken,
-  transporter,
-} = require("../handlers/emailHandler");
 const User = require("../models/User");
-const CriptoJS = require("crypto-js");
+const CryptoJS = require("crypto-js");
+const nodemailer = require("nodemailer");
+const Settings = require("../models/Settings");
 
 const encPass = (password) => {
-  return CriptoJS.AES.encrypt(
+  return CryptoJS.AES.encrypt(
     password,
     process.env.PASSWORD_SECRET_KEY
   ).toString();
 };
+
+function generateRandomCode() {
+  const characters = "0123456789";
+  let code = "";
+
+  for (let i = 0; i < 7; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters.charAt(randomIndex);
+  }
+
+  return +code;
+}
 
 const userController = {
   changeAvatar: async (req, res) => {
@@ -133,35 +142,70 @@ const userController = {
     }
   },
 
-  verifyEmail: async (req, res) => {
-    const email = req.body.email;
+  sendCodeEmail: async (req, res) => {
+    const { email } = req.body;
     try {
-      const verification = generateVerificationToken();
+      const user = await User.findOne({ email });
+      if (!user) return res.status({ message: "User not found" });
+
+      const emailPort = await Settings.findOne().select("emailSendPort");
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: emailPort.emailSendPort.email,
+          pass: CryptoJS.AES.decrypt(
+            emailPort.emailSendPort.password,
+            process.env.PASSWORD_SECRET_KEY
+          ).toString(CryptoJS.enc.Utf8),
+        },
+      });
+
+      const code = generateRandomCode();
 
       const mailOptions = {
-        from: "info@freshgreen.io.vn",
+        from: emailPort.emailSendPort.email,
         to: email,
-        subject: "Email Verification",
-        html: `<p>Click <a href="${host}/verify/${verification}">here</a> to verify your email.</p>`,
+        subject: "Xác thực email",
+        text: `Mã xác nhận của bạn là ${code}. Vui lòng không chia sẻ mã này tới bất kỳ ai, với bất kể lí do gì.`,
       };
-      await transporter.sendMail(mailOptions);
 
-      await User.findOneAndUpdate(
-        { email },
-        {
-          verifyEmail: true,
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return res.status(500).send("Internal Server Error");
         }
-      );
-
+      });
+      user.verificationCode = code;
+      await user.save();
       return res.status(200).json(true);
     } catch (error) {
       return res.status(500).json(error);
     }
   },
 
-  verifyPhone: async (req, res) => {
+  verifyEmail: async (req, res) => {
+    const { email, code } = req.body;
     try {
-    } catch (error) {}
+      const user = await User.findOne({ email });
+      if (!user) return res.status(404).json({ message: "User not found" });
+      if (user.verificationCode !== +code) {
+        return res.status(500).json({ message: "Code không hợp lệ" });
+      }
+      user.verifyEmail = true;
+      await user.save();
+      return res.status(200).json({ message: "Email đã được xác thực" });
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  verifyPhone: async (req, res) => {
+    const { phone } = req.body;
+    try {
+      const user = await User.findOne({ phone });
+      if (!user) return res.status({ message: "User not found" });
+    } catch (error) {
+      return res.status(500).json(error);
+    }
   },
 };
 

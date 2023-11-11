@@ -41,6 +41,7 @@ router.post(
 );
 
 router.post("/reset-password", authController.resetPassword);
+router.post("/check-phone", authController.checkPhone);
 
 router.post("/verify-token", verifyToken, (req, res) => {
   res.status(200).json({ user: req.user });
