@@ -10,7 +10,7 @@ const hostClient = "https://freshgreen.vercel.app";
 
 const app = require("../app");
 const debug = require("debug")("server:server");
-const http = require("https");
+const http = require("http");
 const mongoose = require("mongoose");
 const socketIo = require("socket.io");
 const { socketHandler } = require("../handlers/socketConnect");
