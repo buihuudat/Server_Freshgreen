@@ -10,10 +10,17 @@ const hostClient = "https://freshgreen.vercel.app";
 
 const app = require("../app");
 const debug = require("debug")("server:server");
-const http = require("http");
+const https = require("https");
 const mongoose = require("mongoose");
 const socketIo = require("socket.io");
 const { socketHandler } = require("../handlers/socketConnect");
+const fs = require("fs");
+const d = require("../certs/selfsigned.key");
+
+var privateKey = fs.readFileSync("../certs/selfsigned.key", "utf-8");
+var cecertificatert = fs.readFileSync("../certs/selfsigned.crt", "utf-8");
+
+var credentials = { key: privateKey, cert: certificate };
 
 /**
  * Get port from environment and store in Express.
@@ -26,7 +33,7 @@ app.set("port", port);
  * Create HTTP server.
  */
 
-const server = http.createServer(app);
+const server = https.createServer(credentials, app);
 const io = socketIo(server, {
   cors: {
     origin: [hostClient, hostAdmin, hostApp],
