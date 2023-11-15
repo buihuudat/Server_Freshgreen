@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const CryptoJS = require("crypto-js");
-const nodemailer = require("nodemailer");
-const Settings = require("../models/Settings");
+const sendMail = require("../handlers/sendMailHandler");
 
 const encPass = (password) => {
   return CryptoJS.AES.encrypt(
@@ -9,18 +8,6 @@ const encPass = (password) => {
     process.env.PASSWORD_SECRET_KEY
   ).toString();
 };
-
-function generateRandomCode() {
-  const characters = "0123456789";
-  let code = "";
-
-  for (let i = 0; i < 7; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    code += characters.charAt(randomIndex);
-  }
-
-  return +code;
-}
 
 const userController = {
   changeAvatar: async (req, res) => {
@@ -134,7 +121,6 @@ const userController = {
   delete: async (req, res) => {
     try {
       const user = await User.findByIdAndDelete(req.params.id);
-      console.log(req.params.id);
       if (!user) return res.status(400).json("Không tìm thấy người dùng");
       return res.status(200).json({ message: "Đã xóa thành công người dùng" });
     } catch (err) {
@@ -148,31 +134,10 @@ const userController = {
       const user = await User.findOne({ email });
       if (!user) return res.status({ message: "User not found" });
 
-      const emailPort = await Settings.findOne().select("emailSendPort");
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: emailPort.emailSendPort.email,
-          pass: CryptoJS.AES.decrypt(
-            emailPort.emailSendPort.password,
-            process.env.PASSWORD_SECRET_KEY
-          ).toString(CryptoJS.enc.Utf8),
-        },
-      });
-
-      const code = generateRandomCode();
-
-      const mailOptions = {
-        from: emailPort.emailSendPort.email,
-        to: email,
-        subject: "Xác thực email",
-        text: `Mã xác nhận của bạn là ${code}. Vui lòng không chia sẻ mã này tới bất kỳ ai, với bất kể lí do gì.`,
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return res.status(500).send("Internal Server Error");
-        }
+      await sendMail({
+        title: "Xác thực email",
+        content: `Mã xác nhận của bạn là ${code}. Vui lòng không chia sẻ mã này tới bất kỳ ai, với bất kể lí do gì.`,
+        user: email,
       });
       user.verificationCode = code;
       await user.save();

@@ -1,21 +1,8 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const CryptoJS = require("crypto-js");
-const nodemailer = require("nodemailer");
-const Settings = require("../models/Settings");
-
-const generateTemporaryPassword = () => {
-  const characters =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let temporaryPassword = "";
-
-  for (let i = 0; i < 10; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    temporaryPassword += characters[randomIndex];
-  }
-
-  return temporaryPassword;
-};
+const generateTemporaryPassword = require("../handlers/createPasswordRandom");
+const sendMail = require("../handlers/sendMailHandler");
 
 const createToken = (id) => {
   const token = jwt.sign({ id }, process.env.TOKEN_SECRET_KEY, {
@@ -189,41 +176,19 @@ module.exports = {
           .status(404)
           .json({ message: "Email không đúng hoặc chưa được sử dụng" });
 
-      const emailPort = await Settings.findOne().select("emailSendPort");
-
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: emailPort.emailSendPort.email,
-          pass: CryptoJS.AES.decrypt(
-            emailPort.emailSendPort.password,
-            process.env.PASSWORD_SECRET_KEY
-          ).toString(CryptoJS.enc.Utf8),
-        },
-      });
-
       const newPassword = generateTemporaryPassword();
 
-      const mailOptions = {
-        from: emailPort.emailSendPort.email,
-        to: email,
-        subject: "Password Reset",
-        text: `Mật khẩu mới của bạn là: ${newPassword}. Hãy đổi lại mật khẩu này sau khi đăng nhập.`,
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return res.status(500).send("Internal Server Error");
-        }
+      await sendMail({
+        title: "Password Reset",
+        content: `Mật khẩu mới của bạn là: ${newPassword}. Hãy đổi lại mật khẩu này sau khi đăng nhập.`,
+        user: email,
       });
-      user.password = CryptoJS.AES.encrypt(
-        newPassword,
-        process.env.PASSWORD_SECRET_KEY
-      ).toString();
 
       await user.save();
       return res.status(200).send("Email sent successfully");
-    } catch (error) {}
+    } catch (error) {
+      return res.status(500).send(error);
+    }
   },
 
   checkPhone: async (req, res) => {
