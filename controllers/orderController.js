@@ -5,6 +5,7 @@ const User = require("../models/User");
 const tokensNotification = require("../models/tokensNotification");
 const admin = require("firebase-admin");
 const Notification = require("../models/Notification");
+const sendMail = require("../handlers/sendMailHandler");
 
 const orderController = {
   gets: async (req, res) => {
@@ -84,7 +85,7 @@ const orderController = {
       await sendMail({
         title: "Đặt hàng thành công",
         content:
-          "Chào mừng bạn đến với FreshGreen! Đơn hàng của bạn đã được đặt thành công. Hãy truy cập 'https://freshgreen.vercel.app/quan-li-don-hang' để kiểm tra ngay và theo dõi trạng thái của đơn hàng.",
+          "Đơn hàng của bạn đã được đặt thành công. Hãy truy cập 'https://freshgreen.vercel.app/quan-li-don-hang' để kiểm tra ngay và theo dõi trạng thái của đơn hàng.",
         user: user.email,
       });
 
