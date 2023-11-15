@@ -18,7 +18,7 @@ const fs = require("fs");
 const d = require("../certs/selfsigned.key");
 
 var privateKey = fs.readFileSync("../certs/selfsigned.key", "utf-8");
-var cecertificatert = fs.readFileSync("../certs/selfsigned.crt", "utf-8");
+var certificate = fs.readFileSync("../certs/selfsigned.crt", "utf-8");
 
 var credentials = { key: privateKey, cert: certificate };
 
