@@ -20,7 +20,7 @@ const settingController = {
       ).toString(CryptoJS.enc.Utf8);
       settings.tokenGPT = CryptoJS.AES.decrypt(
         settings.tokenGPT,
-        process.env.PASSWORD_SECRET_KEY
+        process.env.TOKEN_SECRET_KEY
       ).toString(CryptoJS.enc.Utf8);
 
       return res.status(200).json(settings);
