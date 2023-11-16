@@ -130,13 +130,11 @@ const messageController = {
         users: {
           $all: [from, to],
         },
-      })
-        .sort({ updatedAt: 1 })
-        .limit(50);
+      }).sort({ updatedAt: 1 });
 
       const messData = messages.map((mess) => {
         return {
-          fromSelf: mess.sender.toString() !== from,
+          fromSelf: mess.sender.toString() === from,
           message: mess.message?.text || mess.message?.image,
         };
       });
