@@ -85,7 +85,7 @@ const orderController = {
       await sendMail({
         title: "Đặt hàng thành công",
         content:
-          "Đơn hàng của bạn đã được đặt thành công. Hãy truy cập 'https://freshgreen.vercel.app/quan-li-don-hang' để kiểm tra ngay và theo dõi trạng thái của đơn hàng.",
+          "Đơn hàng của bạn đã được đặt thành công. Hãy truy cập https://freshgreen.vercel.app/quan-li-don-hang để kiểm tra ngay và theo dõi trạng thái của đơn hàng.",
         user: user.email,
       });
 

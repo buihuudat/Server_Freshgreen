@@ -16,7 +16,7 @@ const sendMail = async ({ title, content, user }) => {
   });
 
   const mailOptions = {
-    from: emailPort.emailSendPort.email,
+    from: "FreshGreen",
     to: user,
     subject: title,
     text: content,

@@ -14,13 +14,16 @@ const settingController = {
       }
       const settings = await Settings.findOne();
 
-      return res.status(200).json({
-        ...settings,
-        emailSendPort: CryptoJS.AES.decrypt(
-          settings.emailSendPort.password,
-          process.env.PASSWORD_SECRET_KEY
-        ).toString(CryptoJS.enc.Utf8),
-      });
+      settings.emailSendPort.password = CryptoJS.AES.decrypt(
+        settings.emailSendPort.password,
+        process.env.PASSWORD_SECRET_KEY
+      ).toString(CryptoJS.enc.Utf8);
+      settings.tokenGPT = CryptoJS.AES.decrypt(
+        settings.tokenGPT,
+        process.env.PASSWORD_SECRET_KEY
+      ).toString(CryptoJS.enc.Utf8);
+
+      return res.status(200).json(settings);
     } catch (error) {
       return res.status(500).json(error);
     }
@@ -87,6 +90,28 @@ const settingController = {
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
+
+  tokenGPT: async (req, res) => {
+    try {
+      const settings = await Settings.findOne();
+
+      if (!settings) {
+        return res.status(404).json({ error: "Settings not found" });
+      }
+
+      const tokenGPT = CryptoJS.AES.encrypt(
+        req.body.token,
+        process.env.TOKEN_SECRET_KEY
+      ).toString();
+
+      settings.tokenGPT = tokenGPT;
+
+      await settings.save();
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
     }
   },
 };

@@ -4,7 +4,7 @@ const CryptoJS = require("crypto-js");
 const host =
   process.env.NODE_ENV === "development"
     ? "http://localhost:3000"
-    : "http://freshgreen.io.vn";
+    : "https://freshgreen.vercel.app";
 
 const transporter = nodemailer.createTransport({
   host: "sandbox.smtp.mailtrap.io",

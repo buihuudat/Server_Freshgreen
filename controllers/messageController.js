@@ -2,35 +2,46 @@ const { OpenAI } = require("openai");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const Message = require("../models/Message");
-const Shop = require("../models/Shop");
-
-const apiKey = process.env.KEY_GPT;
-const openai = new OpenAI({ apiKey });
+const Settings = require("../models/Settings");
+const CryptoJS = require("crypto-js");
 
 const messageController = {
   ask: async (req, res) => {
     try {
       const products = await Product.find({ status: true }).select("title");
       const productNames = products.map((product) => product.title);
+      const settings = await Settings.findOne();
+      const apiKey = CryptoJS.AES.decrypt(
+        settings.tokenGPT,
+        process.env.TOKEN_SECRET_KEY
+      ).toString(CryptoJS.enc.Utf8);
 
       const messages = [
         {
-          role: "user",
-          content: `Chỉ đưa ra tên sản phẩm ở trong ${productNames.join(", ")}`,
+          role: "system",
+          content: `Đây là cuộc trò chuyện về thương mại điện tử.`,
+        },
+        {
+          role: "system",
+          content: `Chỉ trả lời tên sản phẩm ở trong ${productNames.join(
+            ", "
+          )}`,
         },
         { role: "assistant", content: req.body.message },
       ];
 
+      const openai = new OpenAI({ apiKey });
+
       const response = await openai.chat.completions.create({
         messages,
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-1106",
       });
 
       const aiResponse = response.choices;
-      return res.status(200).json({ message: aiResponse[0].message.content });
+      return res
+        .status(200)
+        .json({ fromSelf: false, message: aiResponse[0].message.content });
     } catch (error) {
-      // Log the error for debugging purposes
-      console.error(error);
       return res
         .status(500)
         .json({ error: "An error occurred while processing your request." });

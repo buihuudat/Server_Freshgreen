@@ -24,7 +24,6 @@ const tokenNotificationController = {
       }
 
       let userFound = false;
-      let tokenReplaced = false;
 
       tokens.forEach((userTokens) => {
         if (userTokens.user.userId.toString() === id) {
@@ -34,7 +33,6 @@ const tokenNotificationController = {
           );
           if (userTokenIndex !== -1) {
             userTokens.tokens[userTokenIndex] = token; // Thay thế token
-            tokenReplaced = true;
           }
         }
       });
@@ -42,12 +40,6 @@ const tokenNotificationController = {
       if (!userFound) {
         const user = await User.findById(id);
         if (user) {
-          const userTokenIndex = tokens.findIndex(
-            (userTokens) => userTokens.user.userId.toString() === id
-          );
-          if (userTokenIndex !== -1) {
-            tokens.splice(userTokenIndex, 1); // Xoá user cũ có token đó đi
-          }
           tokens.push({
             tokens: [token],
             user: {

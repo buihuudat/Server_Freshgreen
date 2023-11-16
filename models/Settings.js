@@ -23,6 +23,8 @@ const settingSchema = new mongoose.Schema(
       email: String,
       password: String,
     },
+
+    tokenGPT: String,
   },
   { timestamps: true }
 );

@@ -23,6 +23,7 @@ router.use("/comments", require("./api/comment"));
 router.use("/notifications", require("./api/notification"));
 router.use("/settings", require("./api/settings"));
 router.use("/messages", require("./api/message"));
+router.use("/delivery", require("./api/delivery"));
 
 router.use("/faq", require("./api/faq"));
 
