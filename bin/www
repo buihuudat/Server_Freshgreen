@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 require("dotenv").config();
-/**
- * Module dependencies.
- */
 
 const hostApp = "http://192.168.1.8:19000";
 const hostAdmin = "https://admin-freshgreen.vercel.app";
 const hostClient = "https://freshgreen.vercel.app";
+// const hostAdmin = "http://localhost:9999";
+// const hostClient = "http://localhost:3000";
 
 const app = require("../app");
 const debug = require("debug")("server:server");
