@@ -18,7 +18,6 @@ const socketHandler = (socket) => {
     const sendUserSocket = onlineUsers.get(data.to);
     if (sendUserSocket) {
       socket.to(sendUserSocket).emit("message-recieve", data);
-      console.log("a", sendUserSocket);
     }
   });
 
@@ -26,7 +25,6 @@ const socketHandler = (socket) => {
     const sendAdminSocket = adminSockets.get(data.to);
     if (sendAdminSocket) {
       socket.to(sendAdminSocket).emit("message-recieve", data);
-      console.log("c", sendAdminSocket);
     }
   });
 
