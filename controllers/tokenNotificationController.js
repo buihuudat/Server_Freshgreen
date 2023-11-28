@@ -8,12 +8,12 @@ const tokenNotificationController = {
 
       let tokensNotification = await TokensNotification.findOne();
 
-      if (!tokensNotification) {
-        tokensNotification = await TokensNotification.create({
-          tokens: [],
-          devices: { mobile: [], web: [] },
-        });
-      }
+      // if (!tokensNotification) {
+      //   tokensNotification = await TokensNotification.create({
+      //     tokens: [],
+      //     devices: { mobile: [], web: [] },
+      //   });
+      // }
 
       const { tokens, devices } = tokensNotification;
 

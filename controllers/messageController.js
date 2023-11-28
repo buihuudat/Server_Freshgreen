@@ -42,9 +42,10 @@ const messageController = {
         .status(200)
         .json({ fromSelf: false, message: aiResponse[0].message.content });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "An error occurred while processing your request." });
+      return res.status(500).json({
+        error: "An error occurred while processing your request.",
+        error,
+      });
     }
   },
 
