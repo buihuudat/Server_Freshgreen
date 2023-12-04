@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const CryptoJS = require("crypto-js");
 const sendMail = require("../handlers/sendMailHandler");
+const checkPhone = require("../handlers/checkPhoneInvalid");
 
 const encPass = (password) => {
   return CryptoJS.AES.encrypt(
@@ -91,7 +92,7 @@ const userController = {
       const updateUser = await User.findByIdAndUpdate(user._id, req.body, {
         new: true,
       });
-      return res.status(200).json(updateUser);
+      return res.status(200).json(checkPhone(updateUser));
     } catch (error) {
       return res.status(500).json(error);
     }
@@ -112,7 +113,7 @@ const userController = {
       if (!user) {
         return res.status(400).json("User not found");
       }
-      return res.status(200).json(user);
+      return res.status(200).json(checkPhone(user));
     } catch (error) {
       return res.status(500).json(error);
     }
@@ -168,6 +169,10 @@ const userController = {
     try {
       const user = await User.findOne({ phone });
       if (!user) return res.status({ message: "User not found" });
+      user.verifyPhone = true;
+      await user.save();
+
+      return res.status(200).json(true);
     } catch (error) {
       return res.status(500).json(error);
     }

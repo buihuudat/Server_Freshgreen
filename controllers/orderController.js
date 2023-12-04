@@ -128,39 +128,27 @@ const orderController = {
       );
 
       if (userFiltered?.tokens && userFiltered?.tokens.length) {
-        if (status === "access") {
-          await admin.messaging().sendEachForMulticast({
-            notification: {
-              title: "FreshGreen",
-              body: "Đơn hàng của bạn đã được xác nhận.",
-            },
-            tokens: userFiltered?.tokens,
-          });
-          await Notification.create({
-            auth: req.body.adminId,
-            title: "Đơn hàng",
-            description: "Đơn hàng của bạn đã được xác nhận.",
-            path: "OrderManager",
-            status: true,
-            send: [req.body.adminId, userId],
-          });
-        } else if (status === "refuse") {
-          await admin.messaging().sendEachForMulticast({
-            notification: {
-              title: "FreshGreen",
-              body: "Đơn hàng của bạn đã bị từ chối.",
-            },
-            tokens: userFiltered.tokens,
-          });
-          await Notification.create({
-            auth: req.body.adminId,
-            title: "Đơn hàng",
-            description: "Đơn hàng của bạn đã bị từ chối.",
-            path: "OrderManager",
-            status: true,
-            send: [req.body.adminId, userId],
-          });
-        }
+        await admin.messaging().sendEachForMulticast({
+          notification: {
+            title: "FreshGreen",
+            body:
+              status === "access"
+                ? "Đơn hàng của bạn đã được xác nhận."
+                : "Đơn hàng của bạn đã bị từ chối.",
+          },
+          tokens: userFiltered?.tokens,
+        });
+        await Notification.create({
+          auth: req.body.adminId,
+          title: "Đơn hàng",
+          description:
+            status === "access"
+              ? "Đơn hàng của bạn đã được xác nhận."
+              : "Đơn hàng của bạn đã bị từ chối.",
+          path: "OrderManager",
+          status: true,
+          send: [req.body.adminId, userId],
+        });
       }
 
       return res.status(200).json(response);
@@ -171,10 +159,14 @@ const orderController = {
   },
 
   delete: async (req, res) => {
-    const { userId } = req.params;
+    const { userId, orderId } = req.params;
     try {
-      await Order.findOneAndDelete({ "user._id": userId });
-      return res.status(200).json({ message: "Deleted order successfully" });
+      const user = await User.findById(userId);
+      if (!user) return res.status(401).json({ message: "User Not Found" });
+      await Order.findOneAndDelete({ "orders._id": userId });
+      return res
+        .status(200)
+        .json({ status: true, message: "Deleted order successfully" });
     } catch (error) {
       return res.status(500).json(error);
     }

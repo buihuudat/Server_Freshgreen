@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const CryptoJS = require("crypto-js");
 const generateTemporaryPassword = require("../handlers/createPasswordRandom");
 const sendMail = require("../handlers/sendMailHandler");
+const checkPhone = require("../handlers/checkPhoneInvalid");
 
 const createToken = (id) => {
   const token = jwt.sign({ id }, process.env.TOKEN_SECRET_KEY, {
@@ -43,9 +44,10 @@ module.exports = {
             },
           ],
         });
+      const user = await User.findById(isUser._id).select("-password").exec();
       return res.status(200).json({
         token: createToken(isUser._id),
-        user: await User.findById(isUser._id).select("-password").exec(),
+        user: checkPhone(user),
       });
     } catch (error) {
       return res.status(500).json(error);
@@ -60,7 +62,7 @@ module.exports = {
       ).toString();
       const user = await User.create(req.body);
       const token = createToken(user._id);
-      return res.status(201).json({ token, user });
+      return res.status(201).json({ token, user: checkPhone(user) });
     } catch (error) {
       return res.status(500).json(error);
     }
@@ -72,7 +74,7 @@ module.exports = {
 
       if (existingUser) {
         const token = createToken(existingUser._id);
-        return res.status(200).json({ user: existingUser, token });
+        return res.status(200).json({ user: checkPhone(existingUser), token });
       }
 
       const userWithSameEmail = await User.findOne({ email: user.email });
@@ -102,7 +104,7 @@ module.exports = {
 
       const newUser = await User.create(user);
       const token = createToken(newUser._id);
-      return res.status(200).json({ user: newUser, token });
+      return res.status(200).json({ user: checkPhone(newUser), token });
     } catch (error) {
       console.error(error);
       return res.status(500).json(error);
@@ -116,7 +118,7 @@ module.exports = {
 
       if (existingUser) {
         const token = createToken(existingUser._id);
-        return res.status(200).json({ user: existingUser, token });
+        return res.status(200).json({ user: checkPhone(existingUser), token });
       }
 
       const userWithSameEmail = await User.findOne({ email: user.email });
@@ -146,7 +148,7 @@ module.exports = {
 
       const newUser = await User.create(user);
       const token = createToken(newUser._id);
-      return res.status(200).json({ user: newUser, token });
+      return res.status(200).json({ user: checkPhone(newUser), token });
     } catch (error) {
       return res.status(500).json(error);
     }
@@ -161,7 +163,7 @@ module.exports = {
           .status(404)
           .json({ message: "Số điện thoại chưa được dùng để đăng kí" });
       const token = createToken(user._id);
-      return res.status(200).json({ token, user });
+      return res.status(200).json({ token, user: checkPhone(user) });
     } catch (error) {
       return res.status(500).json(error);
     }
