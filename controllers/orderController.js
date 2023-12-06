@@ -128,27 +128,39 @@ const orderController = {
       );
 
       if (userFiltered?.tokens && userFiltered?.tokens.length) {
-        await admin.messaging().sendEachForMulticast({
-          notification: {
-            title: "FreshGreen",
-            body:
-              status === "access"
-                ? "Đơn hàng của bạn đã được xác nhận."
-                : "Đơn hàng của bạn đã bị từ chối.",
-          },
-          tokens: userFiltered?.tokens,
-        });
-        await Notification.create({
-          auth: req.body.adminId,
-          title: "Đơn hàng",
-          description:
-            status === "access"
-              ? "Đơn hàng của bạn đã được xác nhận."
-              : "Đơn hàng của bạn đã bị từ chối.",
-          path: "OrderManager",
-          status: true,
-          send: [req.body.adminId, userId],
-        });
+        if (status === "access") {
+          await admin.messaging().sendEachForMulticast({
+            notification: {
+              title: "FreshGreen",
+              body: "Đơn hàng của bạn đã được xác nhận.",
+            },
+            tokens: userFiltered?.tokens,
+          });
+          await Notification.create({
+            auth: req.body.adminId,
+            title: "Đơn hàng",
+            description: "Đơn hàng của bạn đã được xác nhận.",
+            path: "OrderManager",
+            status: true,
+            send: [req.body.adminId, userId],
+          });
+        } else if (status === "refuse") {
+          await admin.messaging().sendEachForMulticast({
+            notification: {
+              title: "FreshGreen",
+              body: "Đơn hàng của bạn đã bị từ chối.",
+            },
+            tokens: userFiltered.tokens,
+          });
+          await Notification.create({
+            auth: req.body.adminId,
+            title: "Đơn hàng",
+            description: "Đơn hàng của bạn đã bị từ chối.",
+            path: "OrderManager",
+            status: true,
+            send: [req.body.adminId, userId],
+          });
+        }
       }
 
       return res.status(200).json(response);
