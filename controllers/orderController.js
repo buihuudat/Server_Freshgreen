@@ -103,8 +103,10 @@ const orderController = {
     try {
       const updateData = { $set: { "orders.$.status": status } };
 
+      const response = { orderId, status };
       if (message !== undefined) {
         updateData.$set["orders.$.message"] = message;
+        response.message = message;
       }
 
       await Order.findOneAndUpdate(
@@ -114,12 +116,6 @@ const orderController = {
         },
         updateData
       );
-
-      const response = { orderId, status };
-
-      if (message !== undefined) {
-        response.message = message;
-      }
 
       const { tokens } = await tokensNotification.findOne();
 

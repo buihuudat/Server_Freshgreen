@@ -1,10 +1,7 @@
 const nodemailer = require("nodemailer");
 const CryptoJS = require("crypto-js");
 
-const host =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : "https://freshgreen.vercel.app";
+const host = "https://freshgreen.vercel.app";
 
 const transporter = nodemailer.createTransport({
   host: "sandbox.smtp.mailtrap.io",
