@@ -44,6 +44,12 @@ const orderController = {
         );
       }
 
+      const { tokens } = await tokensNotification.findOne();
+
+      const tokensResult = tokens
+        .filter((data) => data.user.role === "admin")
+        .flatMap((data) => data.tokens);
+
       const newOrderInfo = newOrder.orders[newOrder.orders.length - 1];
       await Promise.all([
         await Cart.findOneAndDelete({ user: userId }),
@@ -56,6 +62,21 @@ const orderController = {
             { new: true }
           );
 
+          // send notification to admin when quantity <= 3
+          if (productUpdated.quantity <= 3) {
+            await admin.messaging().sendEachForMulticast({
+              notification: {
+                title: "FreshGreen",
+                body: `${productUpdated.title} chỉ còn ${productUpdated.quantity} sản phẩm`,
+              },
+              tokens: tokensResult,
+              data: {
+                userId,
+              },
+            });
+          }
+
+          // hide product when quantity <= 0
           if (productUpdated.quantity <= 0) {
             productUpdated.status = false;
             await productUpdated.save();
@@ -63,12 +84,7 @@ const orderController = {
         }),
       ]);
 
-      const { tokens } = await tokensNotification.findOne();
-
-      const tokensResult = tokens
-        .filter((data) => data.user.role === "admin")
-        .flatMap((data) => data.tokens);
-
+      // send notification to admin when have new orders
       await admin.messaging().sendEachForMulticast({
         notification: {
           title: "FreshGreen",
@@ -80,6 +96,7 @@ const orderController = {
         },
       });
 
+      // send notification to user when user order successful
       const user = await User.findById(userId).select("email");
 
       await sendMail({
