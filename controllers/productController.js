@@ -350,14 +350,20 @@ const productController = {
 
   search: async (req, res) => {
     const { product } = req.query;
+    const removeDiacritics = (str) => {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    };
+    const queryWithoutDiacritics = removeDiacritics(product);
+
     try {
       const products = await Product.find({ status: true });
+      const regex = new RegExp(queryWithoutDiacritics, "i");
+
       const productResult =
         product === "" || product === undefined
           ? []
-          : products.filter((data) =>
-              data.title.toLowerCase().includes(product.toLowerCase())
-            );
+          : products.filter((data) => regex.test(removeDiacritics(data.title)));
+
       return res.status(200).json(productResult);
     } catch (error) {
       return res.status(500).json(error);
