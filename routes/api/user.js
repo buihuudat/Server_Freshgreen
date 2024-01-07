@@ -25,7 +25,8 @@ router.put(
   userController.updateUser
 );
 
-router.patch("/:id", userController.delete);
+router.put("/:userId/role", userController.updateRole),
+  router.patch("/:id", userController.delete);
 
 router.post("/send-code-email", userController.sendCodeEmail);
 router.post("/verify-email", userController.verifyEmail);

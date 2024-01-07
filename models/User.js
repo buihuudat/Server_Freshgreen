@@ -38,6 +38,10 @@ const UserSchema = new mongoose.Schema(
       enum: ["user", "staff", "producer", "admin", "superadmin"],
       default: "user",
     },
+    permissions: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Role",
+    },
     googleId: String,
     facebookId: String,
     verifyEmail: {

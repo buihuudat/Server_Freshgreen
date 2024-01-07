@@ -98,9 +98,22 @@ const userController = {
     }
   },
 
+  updateRole: async (req, res) => {
+    const { userId } = req.params;
+    const { permissions } = req.body;
+    try {
+      const user = await User.findById(userId);
+      user.permissions = permissions;
+      await user.save();
+      return res.status(200).json(true);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
   getUsers: async (req, res) => {
     try {
-      const users = await User.find();
+      const users = await User.find().populate("permissions");
       return res.status(200).json(users);
     } catch (error) {
       return res.status(500).json(error);

@@ -72,7 +72,7 @@ const shopController = {
       const shops = await Shop.find().populate({
         path: "user",
         model: "User",
-        select: "address phone email avatar",
+        select: "address phone email avatar fullname username",
       });
       return res.status(200).json(shops);
     } catch (error) {

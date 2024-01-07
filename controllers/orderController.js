@@ -200,10 +200,20 @@ const orderController = {
   getOrders: async (req, res) => {
     const { id } = req.params;
     try {
-      const admin = await User.findById(id);
-      if (!admin || admin.role !== ("admin" || "superAdmin"))
+      const admin = await User.findById(id).populate("permissions");
+      if (
+        !admin ||
+        !["admin", "superadmin", "staff", "producer"].includes(
+          admin.permissions.name
+        )
+      )
         return res.status(401).json({ message: "You are not admin" });
-      const orders = await Order.find().populate("user", "-password");
+      let orders = [];
+      // if (admin.permissions.name === "producer") {
+      //   orders = await Order.find({ user: id }).populate("user", "-password");
+      // } else {
+      // }
+      orders = await Order.find().populate("user", "-password");
       return res.status(200).json(orders);
     } catch (error) {
       return res.status(500).json(error);
