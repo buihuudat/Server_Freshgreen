@@ -1,10 +1,12 @@
 const userController = require("../../controllers/userController");
 const { body } = require("express-validator");
 const validation = require("../../handlers/validationHandler");
+const adminMiddleware = require("../../middlewares/adminMiddleware");
+const userMiddleware = require("../../middlewares/userMiddleware");
 
 const router = require("express").Router();
 
-router.get("/gets", userController.getUsers);
+router.get("/gets", adminMiddleware, userController.getUsers);
 router.get("/:id", userController.getUser);
 router.post("/:id/change-avatar", userController.changeAvatar);
 router.put(
@@ -25,11 +27,11 @@ router.put(
   userController.updateUser
 );
 
-router.put("/:userId/role", userController.updateRole),
+router.put("/:userId/role", adminMiddleware, userController.updateRole),
   router.patch("/:id", userController.delete);
 
-router.post("/send-code-email", userController.sendCodeEmail);
-router.post("/verify-email", userController.verifyEmail);
-router.post("/verify-phone", userController.verifyPhone);
+router.post("/send-code-email", userMiddleware, userController.sendCodeEmail);
+router.post("/verify-email", userMiddleware, userController.verifyEmail);
+router.post("/verify-phone", userMiddleware, userController.verifyPhone);
 
 module.exports = router;

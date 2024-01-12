@@ -18,7 +18,7 @@ module.exports = {
     try {
       const isUser = await User.findOne({
         $or: [{ phone: username }, { username }, { email: username }],
-      });
+      }).populate("permissions");
 
       if (!isUser)
         return res.status(400).json({
@@ -44,10 +44,12 @@ module.exports = {
             },
           ],
         });
-      const user = await User.findById(isUser._id).select("-password").exec();
+
+      console.log(checkPhone(isUser));
+
       return res.status(200).json({
         token: createToken(isUser._id),
-        user: checkPhone(user),
+        user: checkPhone(isUser),
       });
     } catch (error) {
       return res.status(500).json(error);

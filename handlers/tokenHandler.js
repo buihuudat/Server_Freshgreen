@@ -16,7 +16,7 @@ const tokenDecode = (req) => {
   }
 };
 
-exports.verifyToken = async (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const tokenDecoded = tokenDecode(req);
   if (tokenDecoded) {
     const user = await User.findById(tokenDecoded.id)
@@ -28,4 +28,9 @@ exports.verifyToken = async (req, res, next) => {
   } else {
     return res.status(401).json("Unathorization");
   }
+};
+
+module.exports = {
+  tokenDecode,
+  verifyToken,
 };

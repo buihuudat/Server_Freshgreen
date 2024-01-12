@@ -33,11 +33,11 @@ const UserSchema = new mongoose.Schema(
       street: String,
       more: String,
     },
-    role: {
-      type: String,
-      enum: ["user", "staff", "producer", "admin", "superadmin"],
-      default: "user",
-    },
+    // role: {
+    //   type: String,
+    //   enum: ["user", "staff", "producer", "admin", "superadmin"],
+    //   default: "user",
+    // },
     permissions: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Role",

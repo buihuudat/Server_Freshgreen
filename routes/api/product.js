@@ -2,6 +2,7 @@ const { body } = require("express-validator");
 const productController = require("../../controllers/productController");
 const validation = require("../../handlers/validationHandler");
 const Product = require("../../models/Product");
+const adminMiddleware = require("../../middlewares/adminMiddleware");
 
 const router = require("express").Router();
 
@@ -18,6 +19,7 @@ router.get("/:id", productController.get);
 
 router.post(
   "/create",
+  adminMiddleware,
   body("title")
     .isLength({ min: 3, max: 100 })
     .withMessage("Product title must be between 3 and 100 characters long."),
@@ -34,9 +36,10 @@ router.post(
   productController.create
 );
 
-router.put("/views/:productId", productController.updateView);
+router.put("/views/:productId", adminMiddleware, productController.updateView);
 router.put(
   "/:id",
+  adminMiddleware,
   body("title")
     .isLength({ min: 10, max: 100 })
     .withMessage("Product title must be between 10 and 100 characters long."),
@@ -47,6 +50,6 @@ router.put(
   productController.update
 );
 
-router.patch("/:id", productController.delete);
+router.patch("/:id", adminMiddleware, productController.delete);
 
 module.exports = router;

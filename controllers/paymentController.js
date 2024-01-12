@@ -1,5 +1,4 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const config = require("config");
 const querystring = require("qs");
 const crypto = require("crypto");
 const https = require("https");

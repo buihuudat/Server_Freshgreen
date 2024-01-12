@@ -2,6 +2,7 @@ const { body } = require("express-validator");
 const voucherController = require("../../controllers/voucherController");
 const validation = require("../../handlers/validationHandler");
 const Voucher = require("../../models/Voucher");
+const adminMiddleware = require("../../middlewares/adminMiddleware");
 
 const router = require("express").Router();
 
@@ -9,6 +10,7 @@ router.get("/", voucherController.gets);
 router.get("/:voucher", voucherController.get);
 router.post(
   "/",
+  adminMiddleware,
   body("voucher")
     .isLength({ min: 4 })
     .withMessage("Mã giảm giá yêu cầu tối thiểu là 4 kí tự"),
@@ -23,7 +25,7 @@ router.post(
   validation,
   voucherController.create
 );
-router.put("/:id", voucherController.update);
-router.patch("/:id", voucherController.delete);
+router.put("/:id", adminMiddleware, voucherController.update);
+router.patch("/:id", adminMiddleware, voucherController.delete);
 
 module.exports = router;
