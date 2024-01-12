@@ -24,6 +24,15 @@ const newsController = {
     }
   },
 
+  get: async (req, res) => {
+    try {
+      const news = await News.findOne({ title: req.params.title });
+      return res.status(200).json(news);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
   create: async (req, res) => {
     try {
       const news = await News.create(req.body);
@@ -77,16 +86,16 @@ const newsController = {
       if (!news) {
         return res.status(400).json({ error: "News not found" });
       }
-  
+
       const userIndex = news.likeCount.indexOf(req.params.userId);
       if (userIndex !== -1) {
         news.likeCount.splice(userIndex, 1);
       } else {
         news.likeCount.push(req.params.userId);
       }
-  
+
       await news.save();
-  
+
       return res.status(200).json(true);
     } catch (error) {
       return res.status(500).json(error);

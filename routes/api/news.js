@@ -1,12 +1,12 @@
 const { body } = require("express-validator");
 const newsController = require("../../controllers/newsController");
 const validation = require("../../handlers/validationHandler");
-const News = require("../../models/News");
 const adminMiddleware = require("../../middlewares/adminMiddleware");
 
 const router = require("express").Router();
 
 router.get("/", newsController.gets);
+router.get("/:title", newsController.get);
 router.post(
   "/create",
   adminMiddleware,
