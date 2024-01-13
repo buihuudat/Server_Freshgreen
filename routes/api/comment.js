@@ -4,7 +4,7 @@ const userMiddleware = require("../../middlewares/userMiddleware");
 
 const router = require("express").Router();
 
-router.get("/:productId", commentController.getProductComments);
+router.get("/:productTitle", commentController.getProductComments);
 router.post(
   "/product/:productId/user/:userId",
   userMiddleware,

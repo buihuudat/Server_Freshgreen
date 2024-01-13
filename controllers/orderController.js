@@ -47,7 +47,13 @@ const orderController = {
       const { tokens } = await tokensNotification.findOne();
 
       const tokensResult = tokens
-        .filter((data) => data.user.role === "admin")
+        .filter(
+          (data) =>
+            data.user.role === "admin" ||
+            data.user.role === "producer" ||
+            data.user.role === "superadmin" ||
+            data.user.role === "staff"
+        )
         .flatMap((data) => data.tokens);
 
       const newOrderInfo = newOrder.orders[newOrder.orders.length - 1];
@@ -85,17 +91,18 @@ const orderController = {
       ]);
 
       // send notification to admin when have new orders
-      await admin.messaging().sendEachForMulticast({
-        notification: {
-          title: "FreshGreen",
-          body: "Có một đơn hàng mới",
-        },
-        tokens: tokensResult,
-        data: {
-          userId,
-        },
-      });
-
+      if (tokensResult?.length) {
+        await admin.messaging().sendEachForMulticast({
+          notification: {
+            title: "FreshGreen",
+            body: "Có một đơn hàng mới",
+          },
+          tokens: tokensResult,
+          data: {
+            userId,
+          },
+        });
+      }
       // send notification to user when user order successful
       const user = await User.findById(userId).select("email");
 

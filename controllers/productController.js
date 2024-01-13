@@ -71,7 +71,9 @@ const productController = {
   },
   get: async (req, res) => {
     try {
-      const product = await Product.findById(req.params.id).populate([
+      const product = await Product.findOne({
+        title: req.params.title,
+      }).populate([
         {
           path: "shop",
           model: "Shop",

@@ -5,15 +5,7 @@ const CryptoJS = require("crypto-js");
 const settingController = {
   get: async (req, res) => {
     try {
-      const checkAdmin = await User.findById(req.params.adminID);
-      if (
-        !checkAdmin ||
-        (checkAdmin.role !== "admin" && checkAdmin.role !== "superadmin")
-      ) {
-        return res.status(400).json({ message: "wft???" });
-      }
       const settings = await Settings.findOne();
-
       settings.emailSendPort.password = CryptoJS.AES.decrypt(
         settings.emailSendPort.password,
         process.env.PASSWORD_SECRET_KEY

@@ -3,6 +3,7 @@ const productController = require("../../controllers/productController");
 const validation = require("../../handlers/validationHandler");
 const Product = require("../../models/Product");
 const adminMiddleware = require("../../middlewares/adminMiddleware");
+const userMiddleware = require("../../middlewares/userMiddleware");
 
 const router = require("express").Router();
 
@@ -15,7 +16,7 @@ router.get("/biggest-discount", productController.biggestDiscount);
 router.get("/products-view", productController.productsView);
 router.get("/best-seller", productController.bestSellerProducts);
 router.get("/search", productController.search);
-router.get("/:id", productController.get);
+router.get("/:title", productController.get);
 
 router.post(
   "/create",
@@ -36,7 +37,7 @@ router.post(
   productController.create
 );
 
-router.put("/views/:productId", adminMiddleware, productController.updateView);
+router.put("/views/:productId", userMiddleware, productController.updateView);
 router.put(
   "/:id",
   adminMiddleware,

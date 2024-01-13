@@ -8,13 +8,6 @@ const tokenNotificationController = {
 
       let tokensNotification = await TokensNotification.findOne();
 
-      if (!tokensNotification) {
-        tokensNotification = await TokensNotification.create({
-          tokens: [],
-          devices: { mobile: [], web: [] },
-        });
-      }
-
       const { tokens, devices } = tokensNotification;
 
       if (platform === "mobile" && !devices.mobile.includes(token)) {
@@ -38,13 +31,13 @@ const tokenNotificationController = {
       });
 
       if (!userFound) {
-        const user = await User.findById(id);
+        const user = await User.findById(id).populate("permissions");
         if (user) {
           tokens.push({
             tokens: [token],
             user: {
               userId: user._id,
-              role: user.role,
+              role: user.permissions.name,
               platform: platform,
             },
           });

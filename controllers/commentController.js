@@ -3,9 +3,11 @@ const Product = require("../models/Product");
 
 const commentController = {
   getProductComments: async (req, res) => {
-    const { productId } = req.params;
+    const { productTitle } = req.params;
     try {
-      const product = await Product.findById(productId).select("comments");
+      const product = await Product.findOne({ title: productTitle }).select(
+        "comments"
+      );
 
       if (!product) {
         return res.status(404).json({ error: "Comment not found" });
