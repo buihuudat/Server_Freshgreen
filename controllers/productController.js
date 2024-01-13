@@ -93,10 +93,12 @@ const productController = {
       }
 
       const comments = product.comments;
-      const averageStarRating =
-        comments.reduce((acc, v) => {
-          return acc + v.rate;
-        }, 0) / comments.length;
+      const averageStarRating = product.comments.length
+        ? comments.reduce((acc, v) => {
+            return acc + v.rate;
+          }, 0) / comments.length
+        : 0;
+
       await product.updateOne({ averageStarRating });
       return res.status(200).json(product);
     } catch (error) {
