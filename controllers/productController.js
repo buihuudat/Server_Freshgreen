@@ -171,6 +171,18 @@ const productController = {
         shop: req.params.id,
       });
       const products = await Product.find({ shop: req.params.id, status: true })
+        .populate([
+          {
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          },
+        ])
         .skip(start)
         .limit(perPage || totalProducts);
       return res.status(200).json({ products, totalProducts, page, perPage });
@@ -198,7 +210,20 @@ const productController = {
   },
   productsView: async (req, res) => {
     try {
-      const products = await Product.find({ status: true }).limit(8);
+      const products = await Product.find({ status: true })
+        .populate([
+          {
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          },
+        ])
+        .limit(8);
       return res.status(200).json(products);
     } catch (error) {
       return res.status(500).json(error);
@@ -213,6 +238,18 @@ const productController = {
         "comments.length": { $exists: true },
         status: true,
       })
+        .populate([
+          {
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          },
+        ])
         .sort({
           views: -1,
           "favorites.length": -1,
@@ -282,6 +319,7 @@ const productController = {
         {
           $unwind: "$product",
         },
+
         {
           $match: {
             "product.status": true, // Chỉ lấy sản phẩm có status true
@@ -323,6 +361,18 @@ const productController = {
     try {
       const products = await Product.find({ status: true })
         .sort({ averageStarRating: -1 })
+        .populate([
+          {
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          },
+        ])
         .limit(8);
       return res.status(200).json(products);
     } catch (error) {
@@ -334,6 +384,18 @@ const productController = {
     try {
       const products = await Product.find({ status: true })
         .sort({ createdAt: -1 })
+        .populate([
+          {
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          },
+        ])
         .limit(8);
       return res.status(200).json(products);
     } catch (error) {
@@ -345,6 +407,18 @@ const productController = {
     try {
       const products = await Product.find({ status: true })
         .sort({ discount: -1 })
+        .populate([
+          {
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          },
+        ])
         .limit(8);
       return res.status(200).json(products);
     } catch (error) {
@@ -380,7 +454,20 @@ const productController = {
         category: req.body.category,
         "tags.name": { $in: req.body.tags.map((tag) => tag.name) },
         status: true,
-      }).limit(8);
+      })
+        .populate([
+          {
+            path: "shop",
+            model: "Shop",
+            select: "name user",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "avatar",
+            },
+          },
+        ])
+        .limit(8);
 
       return res.status(200).json(products);
     } catch (error) {
