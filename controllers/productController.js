@@ -1,6 +1,5 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
-const _ = require("lodash");
 
 const productController = {
   gets: async (req, res) => {
@@ -370,6 +369,20 @@ const productController = {
           : products.filter((data) => regex.test(removeDiacritics(data.title)));
 
       return res.status(200).json(productResult);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
+
+  similarProduct: async (req, res) => {
+    try {
+      const products = await Product.find({
+        category: req.body.category,
+        "tags.name": { $in: req.body.tags.map((tag) => tag.name) },
+        status: true,
+      }).limit(8);
+
+      return res.status(200).json(products);
     } catch (error) {
       return res.status(500).json(error);
     }

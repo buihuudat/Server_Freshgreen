@@ -8,13 +8,17 @@ const CryptoJS = require("crypto-js");
 const messageController = {
   ask: async (req, res) => {
     try {
-      const products = await Product.find({ status: true }).select("title");
+      const [settings, products] = await Promise.all([
+        Settings.findOne(),
+        Product.find({ status: true }).select("title"),
+      ]);
       const productNames = products.map((product) => product.title);
-      const settings = await Settings.findOne();
       const apiKey = CryptoJS.AES.decrypt(
         settings.tokenGPT,
         process.env.TOKEN_SECRET_KEY
       ).toString(CryptoJS.enc.Utf8);
+
+      console.log(apiKey);
 
       const messages = [
         {

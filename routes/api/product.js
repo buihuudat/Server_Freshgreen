@@ -17,6 +17,7 @@ router.get("/products-view", productController.productsView);
 router.get("/best-seller", productController.bestSellerProducts);
 router.get("/search", productController.search);
 router.get("/:title", productController.get);
+router.post("/similar", productController.similarProduct);
 
 router.post(
   "/create",
